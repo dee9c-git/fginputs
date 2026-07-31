@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Drill } from "../fgc/types";
+import type { Action, Drill } from "../fgc/types";
 import { actionToStr } from "../fgc/mappings";
 import { didDrill, type HistoryEntry } from "../fgc/matcher";
 import { buildAction, pollGamepad } from "../input/gamepad";
@@ -16,9 +16,9 @@ export interface DrillView {
 
 export function useDrillTracker(drills: Drill[] | null) {
   const [connected, setConnected] = useState(false);
-  const [controllerName, setControllerName] = useState("");
   const [displayLines, setDisplayLines] = useState<DisplayLine[]>([]);
   const [drillViews, setDrillViews] = useState<DrillView[]>([]);
+  const [currentAction, setCurrentAction] = useState<Action | null>(null);
 
   const drillsRef = useRef(drills);
   drillsRef.current = drills;
@@ -34,12 +34,10 @@ export function useDrillTracker(drills: Drill[] | null) {
   const update = useCallback(() => {
     const snapshot = pollGamepad();
     setConnected(snapshot.connected);
-    if (snapshot.connected && snapshot.name) {
-      setControllerName(snapshot.name);
-    }
 
     const state = stateRef.current;
     const frameAction = buildAction(snapshot);
+    setCurrentAction(frameAction);
 
     if (state.currentAction === null) {
       state.currentAction = frameAction;
@@ -96,5 +94,5 @@ export function useDrillTracker(drills: Drill[] | null) {
     return () => cancelAnimationFrame(raf);
   }, [update]);
 
-  return { connected, controllerName, displayLines, drillViews };
+  return { connected, currentAction, displayLines, drillViews };
 }

@@ -4,6 +4,7 @@ import { parser } from "./fgc/parser";
 import { useDrillTracker } from "./state/store";
 import InputHistory from "./ui/InputHistory";
 import DrillList from "./ui/DrillList";
+import ControllerDisplay from "./ui/ControllerDisplay";
 
 function loadDrills(text: string): Drill[] {
   const d = parser(text);
@@ -37,7 +38,7 @@ export default function App() {
       .catch((err) => setError(String(err)));
   }, []);
 
-  const { connected, controllerName, displayLines, drillViews } = useDrillTracker(drills);
+  const { connected, currentAction, displayLines, drillViews } = useDrillTracker(drills);
 
   if (error) {
     return <div className="status">Error: {error}</div>;
@@ -52,9 +53,17 @@ export default function App() {
         <InputHistory lines={displayLines} />
         <DrillList drills={drillViews} />
       </div>
-      <div className="status-bar">
-        {connected ? controllerName : "No controller detected. Press a button on your gamepad."}
-      </div>
+      {connected ? (
+        currentAction && (
+          <div className="controller-area">
+            <ControllerDisplay action={currentAction} />
+          </div>
+        )
+      ) : (
+        <div className="controller-message">
+          No controller detected. Press a button on your gamepad.
+        </div>
+      )}
     </div>
   );
 }

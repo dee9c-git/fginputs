@@ -10,7 +10,6 @@ const ANALOG_TRIGGERS: Record<number, number> = { 6: LT_ID, 7: RT_ID };
 
 export interface GamepadSnapshot {
   connected: boolean;
-  name: string;
   buttons: Set<number>;
   direction: [number, number];
 }
@@ -20,7 +19,7 @@ export function pollGamepad(): GamepadSnapshot {
   const pad = Array.from(pads).find((p) => p !== null && p.connected);
 
   if (!pad) {
-    return { connected: false, name: "", buttons: new Set(), direction: [0, 0] };
+    return { connected: false, buttons: new Set(), direction: [0, 0] };
   }
 
   const buttons = new Set<number>();
@@ -61,7 +60,7 @@ export function pollGamepad(): GamepadSnapshot {
     }
   }
 
-  return { connected: true, name: pad.id, buttons, direction };
+  return { connected: true, buttons, direction };
 }
 
 export function buildAction(snapshot: GamepadSnapshot): Action {
