@@ -53,9 +53,20 @@ body {
 
 .stick-gate {
     position: relative;
-    border-radius: 50%;
-    border: 2px solid #444;
-    background-color: #111;
+}
+
+.stick-octagon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.stick-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
 }
 
 .stick-knob {
