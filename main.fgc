@@ -21,8 +21,12 @@ input K = gamepad.btn.l1
 
 // variables should be snake_case, as capital letters are often used for moves
 // move pot_buster_motion = 6 [%1,%60] 2 [%1,%60] 4 [%1,%3] 6+P [%1,%60]
+
 move mega_fist = 2 3 6 [%0,%5] | P | %15
-// move pot_buster_motion = 6 2 4 [%1,%3] 6+P
+move pot_buster = 6 2 4 6 [%0,%5] | P | %30
+move pot_buster_360 = 4 2 6 8 [%0,%5] | P | %30
+move kara_pot_buster = 6 2 4 6 6+K [%1,%2] | P | %30
+
 // move double_buster = pot_buster_motion pot_buster_motion
 
 // two_sided takes a move and broadens it for both sides

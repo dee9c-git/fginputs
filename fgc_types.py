@@ -33,21 +33,31 @@ class SingleMove:
         return f"SingleMove(action='{self.action}', min_frames='{self.min_frames}', max_frames='{self.max_frames}')"
 
 class Move:
-    def __init__(self, actions: list[SingleMove] | None = None):
-        self.actions = actions if actions is not None else []
+    def __init__(self, sequence, trigger: Action, buffer: int):
+        self.sequence = sequence
+        self.trigger = trigger
+        self.buffer = buffer
     def __repr__(self) -> str:
-        return f"Move(actions='{self.actions}')"
+        return f"Move(sequence='{self.sequence}', trigger='{self.trigger}', buffer='{self.buffer}')"
 
-def add_actions(actions: list[Action]) -> Action:
+def parse_add_actions(action_str: str, d: dict) -> Action:
+    "Parses a string of actions connected with '+' into an Action"
+    actions = action_str.split("+")
+    action_list = []
+    for action in actions:
+        if action not in d:
+            raise Exception(f"Action '{action}' not found")
+        action_list.append(d[action])
     direction = [0, 0]
     buttons = set()
-    for action in actions:
+    for action in action_list:
         direction[0] += action.direction[0]
         direction[1] += action.direction[1]
         buttons = buttons.union(action.buttons)
     return Action(direction, buttons)
 
-def parse_time(frames: str) -> list[int]:
+def parse_time(frames: str) -> tuple[int, int]:
+    """Parses a time string into a list [min_frames, max_frames]"""
     if frames[0] != "[" or frames[-1] != "]":
         raise Exception("Frames must be in the form of [min, max]")
     frames = frames[1:-1]
@@ -58,64 +68,56 @@ def parse_time(frames: str) -> list[int]:
         raise Exception("Frames must be in the form of [%min, %max]")
     if int(max_frames[1:]) > 60:
         raise Exception("Max frames must be less than or equal to 60")
-    return [int(min_frames[1:]), int(max_frames[1:])]
+    return (int(min_frames[1:]), int(max_frames[1:]))
+def parse_sequence(sequence: str, d: dict) -> list[SingleMove]:
+    the_list = sequence.split(" ")
+    ret_list: list[SingleMove] = []
+    for thing in the_list:
+        if thing in d:
+            val = d[thing]
+        elif "+" in thing:
+            val = parse_add_actions(thing, d)
+        elif "[" in thing:
+            val = parse_time(thing)
+        else:
+            raise Exception(f"Unknown type {type(thing)}")
+        if isinstance(val, Action):
+            ret_list.append(SingleMove(val))
+        elif isinstance(val, tuple):
+            ret_list[-1].min_frames = val[0]
+            ret_list[-1].max_frames = val[1]
+        else:
+            raise Exception(f"{type(val)} should be an Action or tuple(frames)")
 
-def parse_right(the_type: str, right, d):
+    return ret_list
+
+def parse_right(the_type: str, right: str, d: dict):
     THE_TYPES = set(["int", "input", "time", "move", "null"])
     if the_type not in THE_TYPES:
         raise Exception(f"Type '{the_type}' not found")
     if the_type == "null":
-        right = right[0]
         if type(right) != str or right != "null":
             raise Exception("null must be null")
         return "null"
     if the_type == "int":
-        right = right[0]
         if type(right) != str or right[0] != "%":
             raise Exception("Integers must be in the form of %number")
         return int(right[1:])
     if the_type == "input":
-        right = right[0]
-        actions = right.split("+")
-        action_list = []
-        for action in actions:
-            if action not in d:
-                raise Exception(f"Action '{action}' not found")
-            action_list.append(d[action])
-        return add_actions(action_list)
+        return parse_add_actions(right, d)
     if the_type == "time":
-        right = right[0]
         if type(right) != str:
             raise Exception("Time must be in the form of [%min, %max]")
         return parse_time(right)
-    move = Move()
-    for thing in right:
-        if thing[0] == "[":
-            if move.actions:
-                min_frames, max_frames = parse_time(thing)
-                move.actions[-1].min_frames = min_frames
-                move.actions[-1].max_frames = max_frames
-            else:
-                raise Exception("Lacking action to set time for move")
-        else:
-            if thing in d:
-                val = d[thing]
-            else:
-                actions = thing.split("+")
-                action_list = []
-                for action in actions:
-                    if action not in d:
-                        raise Exception(f"Action '{action}' not found")
-                    action_list.append(d[action])
-                val = add_actions(action_list)
-            if isinstance(val, Move):
-                move.actions.extend(val.actions)
-                continue
-            elif isinstance(val, Action):
-                move.actions.append(SingleMove(val))
-                continue
-            else:
-                raise Exception(f"Unknown type {type(val)}")
+    move = Move([], None, 30)
+    sequence, trigger, buffer = right.split("|")
+    move.sequence = parse_sequence(sequence.strip(), d)
+    move.trigger = parse_add_actions(trigger.strip(), d)
+    buffer = buffer.strip()
+    if buffer[0] == "%":
+        move.buffer = int(buffer[1:])
+    else:
+        raise Exception("Buffer must be in the form of %number")
     return move
 
 def parser(path: str = "main.fgc") -> dict[str, Any]:
@@ -135,14 +137,14 @@ def parser(path: str = "main.fgc") -> dict[str, Any]:
             assign_var = None
             if "//" in line:
                 line = line[:line.index("//")]
-            l = line.strip().split(" ")
+            l = line.strip()
             if "=" in l:
-                equals_idx = l.index("=")
-                left, right = l[:equals_idx], l[equals_idx+1:]
-                if len(left) != 2:
+                left, right = l.split("=")
+                left_list = left.strip().split(" ")
+                if len(left_list) != 2:
                     raise Exception("Assignment must be in the form of 'type var_name'")
-                assign_type, assign_var = left
-                d[assign_var] = parse_right(assign_type, right, d)
+                assign_type, assign_var = left_list
+                d[assign_var] = parse_right(assign_type, right.strip(), d)
     return d
 # -------------------------
 # parser()

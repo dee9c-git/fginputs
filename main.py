@@ -4,7 +4,7 @@ from fgc_types import *
 
 class Drill:
     def __init__(self, name: str, move: Move, count: int = 0):
-        self.name = " ".join(name.split("_")).capitalize()
+        self.name = " ".join(name.split("_")).title()
         self.move = move
         self.count = count
 d = parser()
@@ -88,24 +88,37 @@ def action_to_str(action: Action) -> str:
     return "+".join(parts)
 
 
-def did_drill(move_history):
+def did_drill(move_history: list[tuple[Action, int]]):
     fin_res = False
     for drill in drills:
+        # find if current input causes a trigger
+        if not drill.move.trigger.buttons <= move_history[-1][0].buttons:
+            continue
         res = True
-        copy_actions = drill.move.actions.copy()
+        copy_sequence = drill.move.sequence.copy()
         copy_history = move_history.copy()
-        while copy_actions and copy_history:
-            expected_move = copy_actions.pop()
-            real_action, real_frames = copy_history.pop()
-            if expected_move.action != real_action:
+        ok_history = []
+        buffer = drill.move.buffer
+        while buffer > 0 and copy_history:
+            the_move = copy_history.pop()
+            ok_history.insert(0, the_move)
+            buffer -= the_move[1]
+
+
+        while copy_sequence:
+            expected_move = copy_sequence.pop()
+            if ok_history:
+                real_action, real_frames = ok_history.pop()
+            else:
                 res = False
-                print(f"Expected {expected_move.action} but got {real_action}")
                 break
-            if expected_move.max_frames < real_frames or expected_move.min_frames > real_frames:
-                res = False
-                print(f"Expected {expected_move.min_frames}~{expected_move.max_frames} but got {real_frames}")
-                break
-            print(f"win on {expected_move.action}")
+            while (not (expected_move.action.direction == real_action.direction and expected_move.action.buttons <= real_action.buttons)
+                   or expected_move.max_frames < real_frames or expected_move.min_frames > real_frames):
+                if ok_history:
+                    real_action, real_frames = ok_history.pop()
+                else:
+                    res = False
+                    break
         if res:
             fin_res = True
             drill.count += 1
@@ -173,7 +186,7 @@ def main():
             current_action = frame_action
             current_frames = 1
 
-        valid_history = move_history[last_move_idx + 1:] if last_move_idx is not None else move_history
+        valid_history = (move_history[last_move_idx + 1:] if last_move_idx is not None else move_history[:])
         valid_history.append((current_action, current_frames))
         drill_succeeded = did_drill(valid_history)
         if drill_succeeded:
