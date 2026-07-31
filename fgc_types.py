@@ -14,11 +14,15 @@ BUTTONS = {
     "START": 11,
 }
 class Action:
-    def __init__(self, direction: list[int] = [0, 0], buttons: set[int] = set()):
-        self.direction = direction
-        self.buttons = buttons
+    def __init__(self, direction: list[int] | None = None, buttons: set[int] | None = None):
+        self.direction = direction if direction is not None else [0, 0]
+        self.buttons = buttons if buttons is not None else set()
     def __repr__(self) -> str:
         return f"Action(direction='{self.direction}', buttons='{self.buttons}')"
+    def __eq__(self, other):
+        if not isinstance(other, Action):
+            return NotImplemented
+        return (self.direction == other.direction) and (self.buttons == other.buttons)
 
 class SingleMove:
     def __init__(self, action: Action, min_frames: int = 1, max_frames: int = 60):
@@ -29,8 +33,8 @@ class SingleMove:
         return f"SingleMove(action='{self.action}', min_frames='{self.min_frames}', max_frames='{self.max_frames}')"
 
 class Move:
-    def __init__(self, actions: list[SingleMove] = []):
-        self.actions = actions
+    def __init__(self, actions: list[SingleMove] | None = None):
+        self.actions = actions if actions is not None else []
     def __repr__(self) -> str:
         return f"Move(actions='{self.actions}')"
 

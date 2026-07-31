@@ -8,10 +8,10 @@ class Drill:
         self.move = move
         self.count = count
 d = parser()
-moves = {}
+drills: list[Drill] = []
 for name, var in d.items():
     if isinstance(var, Move):
-        moves[name] = Drill(name, var)
+        drills.append(Drill(name, var))
         print(f"{name} : {var}")
 
 
@@ -24,6 +24,7 @@ pygame.display.set_caption("Gamepad Input Viewer")
 available_fonts = pygame.font.get_fonts()
 
 font = pygame.font.SysFont("jetbrainsmono", 32)
+big_font = pygame.font.SysFont("jetbrainsmono", 64)
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -42,18 +43,7 @@ BUTTON_NAMES = {
     10: "RS",
 }
 
-TRIGGER_THRESHOLD = 0.5
-
-TRIGGER_NAMES = {
-    2: "LT",
-    3: "RT",
-    4: "LT",
-    5: "RT",
-    6: "LT",
-    7: "RT",
-}
-
-HAT_NAMES = {
+DIR_NAMES = {
     (0, 1): "8",
     (0, -1): "2",
     (-1, 0): "4",
@@ -64,7 +54,62 @@ HAT_NAMES = {
     (1, -1): "3",
 }
 
+TRIGGER_THRESHOLD = 0.5
 
+LT_ID = 100
+RT_ID = 101
+
+TRIGGER_AXES = {
+    2: LT_ID,
+    4: LT_ID,
+    6: LT_ID,
+    3: RT_ID,
+    5: RT_ID,
+    7: RT_ID,
+}
+
+
+def action_to_str(action: Action) -> str:
+    parts = []
+    dx, dy = action.direction
+    if dx != 0 or dy != 0:
+        name = DIR_NAMES.get((dx, dy))
+        if name:
+            parts.append(name)
+    if not parts and not action.buttons:
+        return "5"
+    for btn in sorted(action.buttons):
+        if btn == LT_ID:
+            parts.append("LT")
+        elif btn == RT_ID:
+            parts.append("RT")
+        else:
+            parts.append(BUTTON_NAMES.get(btn, str(btn)))
+    return "+".join(parts)
+
+
+def did_drill(move_history):
+    fin_res = False
+    for drill in drills:
+        res = True
+        copy_actions = drill.move.actions.copy()
+        copy_history = move_history.copy()
+        while copy_actions and copy_history:
+            expected_move = copy_actions.pop()
+            real_action, real_frames = copy_history.pop()
+            if expected_move.action != real_action:
+                res = False
+                print(f"Expected {expected_move.action} but got {real_action}")
+                break
+            if expected_move.max_frames < real_frames or expected_move.min_frames > real_frames:
+                res = False
+                print(f"Expected {expected_move.min_frames}~{expected_move.max_frames} but got {real_frames}")
+                break
+            print(f"win on {expected_move.action}")
+        if res:
+            fin_res = True
+            drill.count += 1
+    return fin_res
 
 def main():
     clock = pygame.time.Clock()
@@ -81,20 +126,15 @@ def main():
             f"Axes: {joy.get_numaxes()}, Buttons: {joy.get_numbuttons()}, Hats: {joy.get_numhats()}"
         )
 
-    active_buttons = set()
-    active_hats = set()
-    active_triggers = set()
-    prev_trigger_vals = {}
+    active_buttons: set[int] = set()
+    current_direction: list[int] = [0, 0]
+    active_triggers: set[int] = set()
+    prev_trigger_vals: dict[int, float] = {}
 
-    current_move = "5"
+    current_action = Action([0, 0], set())
     current_frames = 0
-    move_history = []
-
-    def get_current():
-        all_active = active_buttons | active_hats | active_triggers
-        if not all_active:
-            return "5"
-        return "+".join(sorted(all_active))
+    move_history: list[tuple[Action, int]] = []
+    last_move_idx: int | None = None
 
     running = True
     while running:
@@ -104,53 +144,57 @@ def main():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 running = False
             elif event.type == pygame.JOYBUTTONDOWN:
-                active_buttons.add(BUTTON_NAMES.get(event.button, str(event.button)))
+                active_buttons.add(event.button)
             elif event.type == pygame.JOYBUTTONUP:
-                active_buttons.discard(
-                    BUTTON_NAMES.get(event.button, str(event.button))
-                )
+                active_buttons.discard(event.button)
             elif event.type == pygame.JOYHATMOTION:
                 if event.value == (0, 0):
-                    active_hats.clear()
+                    current_direction = [0, 0]
                 else:
-                    hat_name = HAT_NAMES.get(event.value)
-                    if hat_name:
-                        active_hats = {hat_name}
+                    current_direction = list(event.value)
             elif event.type == pygame.JOYAXISMOTION:
-                if event.axis in TRIGGER_NAMES:
+                if event.axis in TRIGGER_AXES:
+                    btn = TRIGGER_AXES[event.axis]
                     prev_val = prev_trigger_vals.get(event.axis, 0.0)
-                    trig_name = TRIGGER_NAMES[event.axis]
-                    if (
-                        prev_val <= TRIGGER_THRESHOLD
-                        and event.value > TRIGGER_THRESHOLD
-                    ):
-                        active_triggers.add(trig_name)
-                    elif (
-                        prev_val > TRIGGER_THRESHOLD
-                        and event.value <= TRIGGER_THRESHOLD
-                    ):
-                        active_triggers.discard(trig_name)
+                    if prev_val <= TRIGGER_THRESHOLD and event.value > TRIGGER_THRESHOLD:
+                        active_triggers.add(btn)
+                    elif prev_val > TRIGGER_THRESHOLD and event.value <= TRIGGER_THRESHOLD:
+                        active_triggers.discard(btn)
                     prev_trigger_vals[event.axis] = event.value
 
-        frame_move = get_current()
-        if frame_move == current_move:
+        all_buttons = active_buttons | active_triggers
+        frame_action = Action(current_direction[:], set(all_buttons))
+
+        if frame_action.direction == current_action.direction and frame_action.buttons == current_action.buttons:
             current_frames = min(current_frames + 1, 99)
         else:
             if current_frames > 0:
-                move_history.append((current_move, current_frames))
-            current_move = frame_move
+                move_history.append((current_action, current_frames))
+            current_action = frame_action
             current_frames = 1
 
+        valid_history = move_history[last_move_idx + 1:] if last_move_idx is not None else move_history
+        valid_history.append((current_action, current_frames))
+        drill_succeeded = did_drill(valid_history)
+        if drill_succeeded:
+            last_move_idx = len(move_history) - 1
+
         display_lines = move_history[-19:]
-        display_lines.append((current_move, current_frames))
+        display_lines.append((current_action, current_frames))
         display_lines.reverse()
 
         screen.fill(BLACK)
         for i, (move, frames) in enumerate(display_lines):
-            line = f"[{frames:2d}] {move}"
+            line = f"[{frames:2d}] {action_to_str(move)}"
             txt = font.render(line, True, WHITE)
             y = 20 + i * 50
             screen.blit(txt, (20, y))
+
+        for i, drill in enumerate(drills):
+            drill_name = big_font.render(drill.name, True, WHITE)
+            screen.blit(drill_name, (500, 20 + i * 80))
+            drill_count = big_font.render(f"{drill.count}", True, WHITE)
+            screen.blit(drill_count, (WIDTH - 300, 20 + i * 80))
         pygame.display.flip()
         clock.tick(60)
 
