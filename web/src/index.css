@@ -1,0 +1,78 @@
+:root {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #ffffff;
+  background-color: #000000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #000000;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.status {
+  padding: 40px 20px;
+  font-size: 24px;
+}
+
+.layout {
+  flex: 1;
+  display: flex;
+  padding: 0 20px;
+  gap: 60px;
+}
+
+.status-bar {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #888;
+  border-top: 1px solid #333;
+}
+
+.history {
+  flex: 1;
+}
+
+.history-line {
+  font-size: 26px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.frames {
+  color: #ffffff;
+}
+
+.move {
+  margin-left: 16px;
+  color: #ffffff;
+}
+
+.drills {
+  min-width: 300px;
+}
+
+.drill-row {
+  font-size: 48px;
+  line-height: 1.8;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.drill-name {
+  color: #ffffff;
+}
+
+.drill-count {
+  color: #ffffff;
+}
