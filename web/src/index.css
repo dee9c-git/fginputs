@@ -19,16 +19,118 @@ body {
     flex-direction: column;
 }
 
+.sidebar-toggle {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 20;
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 33.33vw;
+    max-width: 33.33vw;
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: #111;
+    border-left: 1px solid #333;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #333;
+}
+
+.editor-toolbar button {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.editor-toolbar button:hover {
+    background: #262626;
+}
+
+.editor-textarea {
+    flex: 1;
+    resize: none;
+    background: #0a0a0a;
+    color: #ddd;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.editor-error {
+    color: #ff6b6b;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid #5a2a2a;
+    border-radius: 6px;
+    background: #1a0d0d;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .status {
     padding: 40px 20px;
     font-size: 24px;
 }
 
 .layout {
-    flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 10fr;
     padding: 0 20px;
-    gap: 60px;
 }
 
 .controller-area {
@@ -85,7 +187,10 @@ body {
 }
 
 .history {
-    flex: 1;
+    padding: 0px 30px;
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
 }
 
 .history-line {
@@ -104,21 +209,97 @@ body {
 }
 
 .drills {
-    min-width: 300px;
+    justify-content: center;
 }
 
 .drill-row {
+    padding: 20px 60px;
     font-size: 48px;
     line-height: 1.8;
     display: flex;
     justify-content: space-between;
-    gap: 40px;
+    align-items: center;
 }
 
 .drill-name {
     color: #ffffff;
+    justify-content: center;
+    padding: 20px;
 }
 
 .drill-count {
+    color: #ffffff;
+}
+
+.drill-list {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: 1fr 1fr;
+}
+
+.drill-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.drill-modes {
+    display: flex;
+    gap: 8px;
+}
+
+.drill-modes button {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.drill-modes button:hover {
+    background: #262626;
+}
+
+.drill-modes button.active {
+    background: #2a4a6a;
+    border-color: #4a8abf;
+}
+
+.drill-controls select {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.drill-focus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.drill-focus .drill-name {
+    max-width: 60%;
+    font-size: 48px;
+    line-height: 1.8;
+    color: #ffffff;
+    text-align: center;
+    background: black;
+    border: 2px solid #ddd;
+    padding: 25px 50px;
+    border-radius: 20px;
+}
+
+.drill-focus .drill-count {
+    font-size: 64px;
     color: #ffffff;
 }

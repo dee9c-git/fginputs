@@ -20,6 +20,17 @@ export function useDrillTracker(drills: Drill[] | null) {
   const [drillViews, setDrillViews] = useState<DrillView[]>([]);
   const [currentAction, setCurrentAction] = useState<Action | null>(null);
 
+  const toDrillViews = useCallback(
+    (d: Drill[]): DrillView[] => d.map((drill) => ({ name: drill.name, count: drill.count })),
+    [],
+  );
+
+  useEffect(() => {
+    if (drills && drills.length > 0) {
+      setDrillViews(toDrillViews(drills));
+    }
+  }, [drills, toDrillViews]);
+
   const drillsRef = useRef(drills);
   drillsRef.current = drills;
 
@@ -69,9 +80,7 @@ export function useDrillTracker(drills: Drill[] | null) {
       if (succeeded) {
         state.lastMoveIdx = state.moveHistory.length - 1;
         state.anyDrill = true;
-        setDrillViews(
-          d.map((drill) => ({ name: drill.name, count: drill.count })),
-        );
+        setDrillViews(toDrillViews(d));
       }
     }
 
@@ -82,7 +91,7 @@ export function useDrillTracker(drills: Drill[] | null) {
     lines.push({ text: actionToStr(state.currentAction), frames: state.currentFrames });
     lines.reverse();
     setDisplayLines(lines);
-  }, []);
+  }, [toDrillViews]);
 
   useEffect(() => {
     let raf = 0;

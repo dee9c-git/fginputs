@@ -1,5 +1,15 @@
 import { Action, Move, SingleMove } from "./types";
 
+export class ParseError extends Error {
+  line: number;
+
+  constructor(message: string, line: number) {
+    super(message);
+    this.name = "ParseError";
+    this.line = line;
+  }
+}
+
 export const BUTTONS: Record<string, number> = {
   A: 0,
   B: 1,
@@ -122,7 +132,8 @@ export function parser(fgcText: string): Record<string, unknown> {
   }
 
   const lines = fgcText.split("\n");
-  for (let line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
     if (line.includes("//")) {
       line = line.slice(0, line.indexOf("//"));
     }
@@ -136,7 +147,12 @@ export function parser(fgcText: string): Record<string, unknown> {
       throw new Error("Assignment must be in the form of 'type var_name'");
     }
     const [assignType, assignVar] = leftList;
-    d[assignVar] = parseRight(assignType, rightStr, d);
+    try {
+      d[assignVar] = parseRight(assignType, rightStr, d);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new ParseError(msg, i + 1);
+    }
   }
   return d;
 }
