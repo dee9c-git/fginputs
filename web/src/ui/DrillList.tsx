@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { DrillView } from "../state/store";
 
-export default function DrillList({ drills }: { drills: DrillView[] }) {
-    const [mode, setMode] = useState<"all" | "focus">("all");
+type View = "all" | "focus" | "settings";
+
+export default function DrillList({
+    drills,
+    settings,
+}: {
+    drills: DrillView[];
+    settings: ReactNode;
+}) {
+    const [view, setView] = useState<View>("all");
     const [selected, setSelected] = useState<string | null>(drills[0]?.name ?? null);
 
     useEffect(() => {
@@ -14,24 +22,41 @@ export default function DrillList({ drills }: { drills: DrillView[] }) {
     const focused = drills.find((d) => d.name === selected) ?? null;
 
     return (
-        <div className="drills">
+        <>
             <div className="drill-controls">
-                <div className="drill-modes">
-                    <button
-                        className={mode === "all" ? "active" : ""}
-                        onClick={() => setMode("all")}
-                    >
-                        All
-                    </button>
-                    <button
-                        className={mode === "focus" ? "active" : ""}
-                        onClick={() => setMode("focus")}
-                    >
-                        Focus
-                    </button>
+                <div className="radio-inputs">
+                    <label className="radio">
+                        <input
+                            type="radio"
+                            name="drill-view"
+                            checked={view === "all"}
+                            onChange={() => setView("all")}
+                        />
+                        <span className="radio-item">All</span>
+                    </label>
+                    <label className="radio">
+                        <input
+                            type="radio"
+                            name="drill-view"
+                            checked={view === "focus"}
+                            onChange={() => setView("focus")}
+                        />
+                        <span className="radio-item">Focus</span>
+                    </label>
+                    <label className="radio">
+                        <input
+                            type="radio"
+                            name="drill-view"
+                            checked={view === "settings"}
+                            onChange={() => setView("settings")}
+                        />
+                        <span className="radio-item">Settings</span>
+                    </label>
                 </div>
             </div>
-            {mode === "focus" && focused ? (
+            {view === "settings" ? (
+                <div className="settings-page">{settings}</div>
+            ) : view === "focus" && focused ? (
                 <div className="drill-focus">
                     <select
                         value={selected ?? ""}
@@ -48,18 +73,16 @@ export default function DrillList({ drills }: { drills: DrillView[] }) {
                         <span className="drill-count">{focused.count}</span>
                     </div>
                 </div>
-            ) :
+            ) : (
                 <div className="drill-list">
-                    {
-                        drills.map((drill) => (
-                            <div key={drill.name} className="drill-row">
-                                <span className="drill-name">{drill.name}</span>
-                                <span className="drill-count">{drill.count}</span>
-                            </div>
-                        ))
-                    }
+                    {drills.map((drill) => (
+                        <div key={drill.name} className="drill-row">
+                            <span className="drill-name">{drill.name}</span>
+                            <span className="drill-count">{drill.count}</span>
+                        </div>
+                    ))}
                 </div>
-            }
-        </div>
+            )}
+        </>
     );
 }

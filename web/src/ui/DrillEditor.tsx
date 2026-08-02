@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 interface DrillEditorProps {
-  open: boolean;
   text: string;
   error: string | null;
   onChange: (text: string) => void;
@@ -12,7 +11,6 @@ interface DrillEditorProps {
 }
 
 export default function DrillEditor({
-  open,
   text,
   error,
   onChange,
@@ -24,7 +22,7 @@ export default function DrillEditor({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <aside className={`sidebar${open ? " open" : ""}`}>
+    <div className="editor">
       <textarea
         className="editor-textarea"
         wrap="off"
@@ -62,6 +60,6 @@ export default function DrillEditor({
           }}
         />
       </div>
-    </aside>
+    </div>
   );
 }

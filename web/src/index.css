@@ -1,5 +1,5 @@
 :root {
-    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: "Space Grotesk", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     color: #ffffff;
     background-color: #000000;
 }
@@ -17,58 +17,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-}
-
-.sidebar-toggle {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    z-index: 20;
-    background: #1a1a1a;
-    color: #fff;
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-family: inherit;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 30;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.sidebar-backdrop.open {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 33.33vw;
-    max-width: 33.33vw;
-    z-index: 31;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 16px;
-    background: #111;
-    border-left: 1px solid #333;
-    transform: translateX(100%);
-    transition: transform 0.2s ease;
-}
-
-.sidebar.open {
-    transform: translateX(0);
 }
 
 .editor-toolbar {
@@ -120,6 +68,19 @@ body {
     background: #1a0d0d;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.settings-page {
+    width: 100%;
+    height: 70vh;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    min-height: 0;
 }
 
 .status {
@@ -187,6 +148,7 @@ body {
 }
 
 .history {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     padding: 0px 30px;
     display: flex;
     flex-direction: column;
@@ -242,19 +204,61 @@ body {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
+    margin: 16px 0;
 }
 
-.drill-modes {
+.radio-inputs {
+    position: relative;
     display: flex;
-    gap: 8px;
+    border-radius: 4px;
+    background-color: #111111;
+    box-sizing: border-box;
+    padding: 0.3rem 0.5rem;
+    gap: 0.4rem;
+    font-size: 20px;
+    transition: clip-path 0.3s ease;
+}
+
+.radio-inputs .radio {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.radio-inputs .radio input {
+    display: none;
+}
+
+.radio-inputs .radio .radio-item {
+    min-width: 150px;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: none;
+    padding: 0.5rem 0;
+    color: #c2c1be;
+    transition:
+        background-color 0.5s ease,
+        font-weight 0.5s ease;
+}
+
+.radio-inputs input:checked~.radio-item {
+    background-color: #333333;
+    font-weight: 600;
+    color: #fff;
+}
+
+.radio-inputs input:checked~.radio {
+    clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
 }
 
 .drill-modes button {
-    background: #1a1a1a;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    border: none;
     color: #fff;
-    border: 1px solid #444;
-    border-radius: 6px;
     padding: 6px 14px;
     font-family: inherit;
     font-size: 14px;
@@ -262,12 +266,7 @@ body {
 }
 
 .drill-modes button:hover {
-    background: #262626;
-}
-
-.drill-modes button.active {
-    background: #2a4a6a;
-    border-color: #4a8abf;
+    color: #cfe3ff;
 }
 
 .drill-controls select {

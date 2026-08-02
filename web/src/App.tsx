@@ -38,7 +38,6 @@ export default function App() {
   const [sourceText, setSourceText] = useState<string | null>(null);
   const [defaultText, setDefaultText] = useState("");
   const [parseError, setParseError] = useState<string | null>(null);
-  const [editorOpen, setEditorOpen] = useState(false);
 
   useEffect(() => {
     fetch("/main.fgc")
@@ -116,28 +115,24 @@ export default function App() {
 
   return (
     <div className="app">
-      {!editorOpen && (
-        <button className="sidebar-toggle" onClick={() => setEditorOpen(true)}>
-          Settings
-        </button>
-      )}
-      <div
-        className={`sidebar-backdrop${editorOpen ? " open" : ""}`}
-        onClick={() => setEditorOpen(false)}
-      />
-      <DrillEditor
-        open={editorOpen}
-        text={sourceText}
-        error={parseError}
-        onChange={handleTextChange}
-        onApply={handleApply}
-        onDownload={handleDownload}
-        onImport={handleImport}
-        onReset={handleReset}
-      />
       <div className="layout">
         <InputHistory lines={displayLines} />
-        <DrillList drills={drillViews} />
+        <div className="drills">
+          <DrillList
+            drills={drillViews}
+            settings={
+              <DrillEditor
+                text={sourceText}
+                error={parseError}
+                onChange={handleTextChange}
+                onApply={handleApply}
+                onDownload={handleDownload}
+                onImport={handleImport}
+                onReset={handleReset}
+              />
+            }
+          />
+        </div>
       </div>
       {connected ? (
         currentAction && (
