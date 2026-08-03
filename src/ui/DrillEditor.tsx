@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import ControllerDebug from "./ControllerDebug";
 
 interface DrillEditorProps {
   text: string;
@@ -23,6 +24,7 @@ export default function DrillEditor({
 
   return (
     <div className="editor">
+      <ControllerDebug />
       <textarea
         className="editor-textarea"
         wrap="off"

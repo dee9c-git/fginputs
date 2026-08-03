@@ -1,17 +1,18 @@
 import { Action } from "./types";
 
 export const BUTTON_NAMES: Record<number, string> = {
-    0: "A",
-    1: "RC",
-    2: "P",
-    3: "S",
-    4: "K",
-    5: "H",
-    6: "Back",
-    7: "Guide",
-    8: "Start",
-    9: "LS",
-    10: "RS",
+    0: "B0",
+    1: "B1",
+    2: "B2",
+    3: "B3",
+    4: "LB",
+    5: "RB",
+    6: "LT",
+    7: "RT",
+    8: "Back",
+    9: "Start",
+    10: "LS",
+    11: "RS",
 };
 
 export const DIR_NAMES: Record<string, string> = {

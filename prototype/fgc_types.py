@@ -1,9 +1,17 @@
 from typing import Any
 BUTTONS = {
-    "A": 0,
-    "B": 1,
-    "X": 2,
-    "Y": 3,
+    "B0": 0,
+    "B1": 1,
+    "B2": 2,
+    "B3": 3,
+    "B4": 4,
+    "B5": 5,
+    "B6": 6,
+    "B7": 7,
+    "B8": 8,
+    "B9": 9,
+    "B10": 10,
+    "B11": 11,
     "L1": 4,
     "L2": 5,
     "L3": 6,
@@ -12,6 +20,12 @@ BUTTONS = {
     "R3": 9,
     "SELECT": 10,
     "START": 11,
+    "LB": 4,
+    "RB": 7,
+    "LT": 5,
+    "RT": 8,
+    "LS": 6,
+    "RS": 9,
 }
 class Action:
     def __init__(self, direction: list[int] | None = None, buttons: set[int] | None = None):

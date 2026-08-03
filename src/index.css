@@ -83,6 +83,23 @@ body {
     min-height: 0;
 }
 
+.controller-debug {
+    flex-shrink: 0;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #999;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+.controller-debug .dbg-label {
+    color: #4a8abf;
+    font-weight: bold;
+}
+
 .status {
     padding: 40px 20px;
     font-size: 24px;
