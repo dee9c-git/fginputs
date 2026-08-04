@@ -1,0 +1,36 @@
+// -----HELPER VARIABLES-----
+
+null > = null
+frames ~ = [%1,%2]
+
+// -----NUMPAD NOTATION-----
+
+input 2 = gamepad.dir.down
+input 4 = gamepad.dir.left
+input 6 = gamepad.dir.right
+input 8 = gamepad.dir.up
+
+input 1 = 2+4 // left + down
+input 3 = 2+6 // right + down
+input 7 = 4+8 // left + up
+input 9 = 6+8 // right + up
+
+// -----BUTTONS (SET THESE TO THE BUTTONS YOU USE)------
+
+input P = gamepad.btn.b2
+input K = gamepad.btn.lb
+input S = gamepad.btn.b3
+input H = gamepad.btn.rb
+input D = gamepad.btn.rs
+
+// -----MOVES-----
+
+move quarter_circle_L = 2 1 4 [%0,%5] | P ; K ; S ; H ; D | %15
+move quarter_circle_R = 2 3 6 [%0,%5] | P ; K ; S ; H ; D | %15
+move dragon_punch_L = 4 2 1 [%0,%5] | P ; K ; S ; H ; D | %15
+move dragon_punch_R = 6 2 3 [%0,%5] | P ; K ; S ; H ; D | %15
+move quarter_circle_x2_L = 2 4 2 4 [%0,%5] | P ; K ; S ; H ; D | %15
+move quarter_circle_x2_R = 2 6 2 6 [%0,%5] | P ; K ; S ; H ; D | %15
+move half_circle_forward_L = 4 2 6 4 [%0,%5] | P ; K ; S ; H ; D | %30
+move half_circle_forward_R = 6 2 4 6 [%0,%5] | P ; K ; S ; H ; D | %30
+move 360_all = 4 2 6 8 [%0,%5] ; 6 2 4 8 [%0,%5] ; 8 4 2 6 [%0,%5] ; 8 6 2 4 [%0,%5] | P ; K ; S ; H ; D | %30

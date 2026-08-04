@@ -24,26 +24,34 @@ export class Action {
   }
 }
 
+export class Frames {
+  min: number;
+  max: number;
+
+  constructor(min: number, max: number) {
+    this.min = min;
+    this.max = max;
+  }
+}
+
 export class SingleMove {
   action: Action;
-  minFrames: number;
-  maxFrames: number;
+  frames: Frames;
 
-  constructor(action: Action, minFrames: number = 1, maxFrames: number = 60) {
+  constructor(action: Action, frames?: Frames) {
     this.action = action;
-    this.minFrames = minFrames;
-    this.maxFrames = maxFrames;
+    this.frames = frames ?? new Frames(1, 60);
   }
 }
 
 export class Move {
-  sequence: SingleMove[];
-  trigger: Action;
+  sequences: SingleMove[][];
+  triggers: Action[];
   buffer: number;
 
-  constructor(sequence: SingleMove[], trigger: Action, buffer: number) {
-    this.sequence = sequence;
-    this.trigger = trigger;
+  constructor(sequences: SingleMove[][], triggers: Action[], buffer: number) {
+    this.sequences = sequences;
+    this.triggers = triggers;
     this.buffer = buffer;
   }
 }
@@ -52,4 +60,10 @@ export interface Drill {
   name: string;
   move: Move;
   count: number;
+  combo: number;
+  missed: boolean;
+  attempts: number;
+  totalFrames: number;
+  lastFrames: number;
+  lastMissed: boolean;
 }

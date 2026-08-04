@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Action, Drill } from "../fgc/types";
 import { actionToStr } from "../fgc/mappings";
-import { didDrill, type HistoryEntry } from "../fgc/matcher";
+import { didDrill, type DrillAttempt, type HistoryEntry } from "../fgc/matcher";
 import { buildAction, pollGamepad } from "../input/gamepad";
 
 export interface DisplayLine {
@@ -12,16 +12,42 @@ export interface DisplayLine {
 export interface DrillView {
   name: string;
   count: number;
+  combo: number;
+  missed: boolean;
+  attempts: number;
+  totalFrames: number;
+  lastFrames: number;
+  lastMissed: boolean;
 }
 
-export function useDrillTracker(drills: Drill[] | null) {
+export function useDrillTracker(
+  drills: Drill[] | null,
+  buttonNames: Record<number, string>,
+  focusName: string | null,
+) {
   const [connected, setConnected] = useState(false);
   const [displayLines, setDisplayLines] = useState<DisplayLine[]>([]);
   const [drillViews, setDrillViews] = useState<DrillView[]>([]);
   const [currentAction, setCurrentAction] = useState<Action | null>(null);
 
+  const buttonNamesRef = useRef(buttonNames);
+  buttonNamesRef.current = buttonNames;
+
+  const focusNameRef = useRef(focusName);
+  focusNameRef.current = focusName;
+
   const toDrillViews = useCallback(
-    (d: Drill[]): DrillView[] => d.map((drill) => ({ name: drill.name, count: drill.count })),
+    (d: Drill[]): DrillView[] =>
+      d.map((drill) => ({
+        name: drill.name,
+        count: drill.count,
+        combo: drill.combo,
+        missed: drill.missed,
+        attempts: drill.attempts,
+        totalFrames: drill.totalFrames,
+        lastFrames: drill.lastFrames,
+        lastMissed: drill.lastMissed,
+      })),
     [],
   );
 
@@ -29,7 +55,12 @@ export function useDrillTracker(drills: Drill[] | null) {
     if (drills && drills.length > 0) {
       setDrillViews(toDrillViews(drills));
     }
+    stateRef.current.attempts.clear();
   }, [drills, toDrillViews]);
+
+  useEffect(() => {
+    stateRef.current.attempts.clear();
+  }, [focusName]);
 
   const drillsRef = useRef(drills);
   drillsRef.current = drills;
@@ -40,6 +71,7 @@ export function useDrillTracker(drills: Drill[] | null) {
     currentFrames: 0,
     lastMoveIdx: null as number | null,
     anyDrill: false,
+    attempts: new Map<Drill, DrillAttempt>(),
   });
 
   const update = useCallback(() => {
@@ -76,24 +108,27 @@ export function useDrillTracker(drills: Drill[] | null) {
 
     const d = drillsRef.current;
     if (d && d.length > 0 && validHistory.length > 0) {
-      const succeeded = didDrill(validHistory, d);
-      if (succeeded) {
+      const result = didDrill(validHistory, d, state.attempts, focusNameRef.current);
+      if (result.success) {
         state.lastMoveIdx = state.moveHistory.length - 1;
         state.anyDrill = true;
+        setDrillViews(toDrillViews(d));
+      } else if (result.miss) {
         setDrillViews(toDrillViews(d));
       }
     }
 
     const lines: DisplayLine[] = state.moveHistory.slice(-19).map((h) => ({
-      text: actionToStr(h.action),
+      text: actionToStr(h.action, buttonNamesRef.current),
       frames: h.frames,
     }));
-    lines.push({ text: actionToStr(state.currentAction), frames: state.currentFrames });
+    lines.push({ text: actionToStr(state.currentAction, buttonNamesRef.current), frames: state.currentFrames });
     lines.reverse();
     setDisplayLines(lines);
   }, [toDrillViews]);
 
   useEffect(() => {
+    if (!focusName) return;
     let raf = 0;
     const loop = () => {
       update();
@@ -101,7 +136,7 @@ export function useDrillTracker(drills: Drill[] | null) {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [update]);
+  }, [update, focusName]);
 
   return { connected, currentAction, displayLines, drillViews };
 }

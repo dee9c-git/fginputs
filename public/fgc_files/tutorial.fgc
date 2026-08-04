@@ -1,0 +1,68 @@
+// Types: int, input, frames, move, null
+// Special symbols: =, |, ;, ~, +, %, [, ], /. These cannot be used as variable names. Note that symbols like !@#$<>^*~ can be used.
+// this is a comment
+
+// The type has to be specified for each variable at the beginning of the line.
+// null give the variable the meaning of nothing, it will be ignored in combos
+// Yes, the variable name is literally ">" c:
+null > = null
+
+
+// %number is an integer, as numbers are used as directions for numpad notation
+
+input 2 = gamepad.dir.down
+input 4 = gamepad.dir.left
+input 6 = gamepad.dir.right
+input 8 = gamepad.dir.up
+
+// Adding inputs combines them, adding up and down gives neutral.
+input 1 = 2+4 // left + down
+input 3 = 2+6 // right + down
+input 7 = 4+8 // left + up
+input 9 = 6+8 // right + up
+
+// Buttons are addressed by raw index as gamepad.btn.b0 through gamepad.btn.b11.
+// This is because hitbox, Xbox, Nintendo and PS5 make the buttons b0-b3 hard to be consistent 
+// Luckily most other buttons are consistent enough, so we have aliases:
+// l1/lb -> b4, l2/lt -> b5, l3/ls -> b6, r1/rb -> b7, r2/rt -> b8, r3/rs -> b9, select -> b10, start -> b11
+
+// GGST buttons:
+input P = gamepad.btn.b2
+input K = gamepad.btn.b4
+input D = gamepad.btn.rs // same as gamepad.btn.b9
+
+
+// frames give a range of frames to wait for, with the syntax [%start,%end], no spaces are allowed
+// plink inputs have a strict 1~2 frame window, so I set ~ to be 1~2 frames
+frames ~ = [%1,%2]
+
+
+// variables should be snake_case, as capital letters are often used for moves
+
+// a move is: sequence | trigger | %buffer
+
+// sequence: a list of inputs+frames
+// take quarter circle forward, you can write it as 2 [%1,%60] 3 [%1,%60] 6 [%0,%5]
+// for 2 and 3, you have a good margin of error, only 6 is the one where we care about the timing
+// so we can write it as 2 3 6 [%0,%5], and the frames will be added automatically to the sequence
+
+// trigger: an input, usually a button.
+// the %0 means on [%0,%5] allows for both 2 3 6+P and 2 3 6 5+P to be valid,
+// as long as the P input is done less than 5 frames after 6.
+
+// %buffer: the number of frames you have to do the entire move.
+// quarter circles get around 15 frames, while supers get around 30 frames.
+
+// behold, our first move!
+move mega_fist = 2 3 6 [%0,%5] | P | %15
+
+// use ; to give a move multiple sequences or triggers:
+// move x = seq1 ; seq2 | trig1 ; trig2 | %buffer
+
+move pot_buster = 6 2 4 6 [%0,%5] | P | %30
+move pot_buster_360 = 4 2 6 8 [%0,%5] | P | %30
+
+
+move kara_pot_buster = 6 2 4 6 6+K ~ | P | %30
+// move kara_pot_buster = 6 2 4 6 6+K [%1,%2] | P | %30
+

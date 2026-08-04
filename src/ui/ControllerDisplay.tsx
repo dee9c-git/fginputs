@@ -37,17 +37,25 @@ interface Target {
   text: string;
 }
 
-function buttonLabels(buttons: Set<number>): string {
+function buttonLabels(buttons: Set<number>, buttonNames: Record<number, string>): string {
   const labels: string[] = [];
   for (const btn of [...buttons].sort((a, b) => a - b)) {
-    if (btn === LT_ID) labels.push("LT");
+    const name = buttonNames[btn];
+    if (name) labels.push(name);
+    else if (btn === LT_ID) labels.push("LT");
     else if (btn === RT_ID) labels.push("RT");
     else labels.push(BUTTON_NAMES[btn] ?? String(btn));
   }
   return labels.join("+");
 }
 
-export default function ControllerDisplay({ action }: { action: Action }) {
+export default function ControllerDisplay({
+  action,
+  buttonNames,
+}: {
+  action: Action;
+  buttonNames: Record<number, string>;
+}) {
   const knobRef = useRef<HTMLDivElement>(null);
   const trailSvgRef = useRef<SVGSVGElement>(null);
   const targetRef = useRef<Target>({ x: 0, y: 0, r: KNOB_RADIUS, pressed: false, text: "" });
@@ -58,7 +66,7 @@ export default function ControllerDisplay({ action }: { action: Action }) {
   const knobR = pressed ? PRESSED_KNOB_RADIUS : KNOB_RADIUS;
   const diag = dx !== 0 && dy !== 0;
   const travel = diag ? CORNER_RADIUS * Math.SQRT1_2 : SIDE_RADIUS;
-  const text = pressed ? buttonLabels(action.buttons) : "";
+  const text = pressed ? buttonLabels(action.buttons, buttonNames) : "";
 
   useEffect(() => {
     targetRef.current = {

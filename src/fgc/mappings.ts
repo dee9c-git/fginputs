@@ -40,7 +40,10 @@ export const TRIGGER_AXES: Record<number, number> = {
     7: RT_ID,
 };
 
-export function actionToStr(action: Action): string {
+export function actionToStr(
+    action: Action,
+    buttonNames: Record<number, string> = {},
+): string {
     const parts: string[] = [];
     const [dx, dy] = action.direction;
     if (dx !== 0 || dy !== 0) {
@@ -51,7 +54,9 @@ export function actionToStr(action: Action): string {
         return "5";
     }
     for (const btn of [...action.buttons].sort((a, b) => a - b)) {
-        if (btn === LT_ID) parts.push("LT");
+        const name = buttonNames[btn];
+        if (name) parts.push(name);
+        else if (btn === LT_ID) parts.push("LT");
         else if (btn === RT_ID) parts.push("RT");
         else parts.push(BUTTON_NAMES[btn] ?? String(btn));
     }

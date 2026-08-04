@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import ControllerDebug from "./ControllerDebug";
 
 interface DrillEditorProps {
   text: string;
@@ -24,27 +23,6 @@ export default function DrillEditor({
 
   return (
     <div className="editor">
-      <ControllerDebug />
-      <textarea
-        className="editor-textarea"
-        wrap="off"
-        spellCheck={false}
-        value={text}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Tab") {
-            e.preventDefault();
-            const el = e.currentTarget;
-            const { selectionStart, selectionEnd } = el;
-            const next = text.slice(0, selectionStart) + "  " + text.slice(selectionEnd);
-            onChange(next);
-            requestAnimationFrame(() => {
-              el.selectionStart = el.selectionEnd = selectionStart + 2;
-            });
-          }
-        }}
-      />
-      {error && <div className="editor-error">{error}</div>}
       <div className="editor-toolbar">
         <button onClick={onApply}>Apply</button>
         <button onClick={onDownload}>Download</button>
@@ -61,6 +39,28 @@ export default function DrillEditor({
             e.target.value = "";
           }}
         />
+      </div>
+      <div className="editor-main">
+        <textarea
+          className="editor-textarea"
+          wrap="off"
+          spellCheck={false}
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              const el = e.currentTarget;
+              const { selectionStart, selectionEnd } = el;
+              const next = text.slice(0, selectionStart) + "  " + text.slice(selectionEnd);
+              onChange(next);
+              requestAnimationFrame(() => {
+                el.selectionStart = el.selectionEnd = selectionStart + 2;
+              });
+            }
+          }}
+        />
+        {error && <div className="editor-error">{error}</div>}
       </div>
     </div>
   );

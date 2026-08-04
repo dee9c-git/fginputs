@@ -1,66 +1,32 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { DrillView } from "../state/store";
 
-type View = "all" | "focus" | "settings";
+export type View = "moves" | "training" | "settings";
 
 export default function DrillList({
     drills,
+    view,
+    selected,
+    onSelectedChange,
     settings,
 }: {
     drills: DrillView[];
+    view: View;
+    selected: string | null;
+    onSelectedChange: (name: string) => void;
     settings: ReactNode;
 }) {
-    const [view, setView] = useState<View>("all");
-    const [selected, setSelected] = useState<string | null>(drills[0]?.name ?? null);
-
-    useEffect(() => {
-        if (drills.length > 0 && !drills.some((d) => d.name === selected)) {
-            setSelected(drills[0].name);
-        }
-    }, [drills, selected]);
-
     const focused = drills.find((d) => d.name === selected) ?? null;
 
     return (
         <>
-            <div className="drill-controls">
-                <div className="radio-inputs">
-                    <label className="radio">
-                        <input
-                            type="radio"
-                            name="drill-view"
-                            checked={view === "all"}
-                            onChange={() => setView("all")}
-                        />
-                        <span className="radio-item">All</span>
-                    </label>
-                    <label className="radio">
-                        <input
-                            type="radio"
-                            name="drill-view"
-                            checked={view === "focus"}
-                            onChange={() => setView("focus")}
-                        />
-                        <span className="radio-item">Focus</span>
-                    </label>
-                    <label className="radio">
-                        <input
-                            type="radio"
-                            name="drill-view"
-                            checked={view === "settings"}
-                            onChange={() => setView("settings")}
-                        />
-                        <span className="radio-item">Settings</span>
-                    </label>
-                </div>
-            </div>
             {view === "settings" ? (
                 <div className="settings-page">{settings}</div>
-            ) : view === "focus" && focused ? (
+            ) : view === "training" && focused ? (
                 <div className="drill-focus">
                     <select
                         value={selected ?? ""}
-                        onChange={(e) => setSelected(e.target.value)}
+                        onChange={(e) => onSelectedChange(e.target.value)}
                         className="drill-name"
                     >
                         {drills.map((d) => (
@@ -70,15 +36,43 @@ export default function DrillList({
                         ))}
                     </select>
                     <div className="drill-focus-stats">
-                        <span className="drill-count">{focused.count}</span>
+                        <span
+                            className={`drill-combo${focused.missed ? " drill-combo-miss" : ""}`}
+                        >
+                            {focused.missed ? "COMBO: MISS" : `COMBO: x${focused.combo}`}
+                        </span>
+                        <span className="drill-done">
+                            Success Rate:{" "}
+                            {focused.attempts === 0
+                                ? "--/--"
+                                : `${focused.count}/${focused.attempts}`}{" "}
+                            (
+                            {focused.attempts > 0
+                                ? Math.round((focused.count / focused.attempts) * 100)
+                                : 0}
+                            %) / Time:{" "}
+                            {focused.attempts === 0
+                                ? "--"
+                                : focused.lastMissed
+                                  ? "MISS"
+                                  : `${focused.lastFrames}f`}{" "}
+                            [Average:{" "}
+                            {focused.count > 0
+                                ? Math.round(focused.totalFrames / focused.count)
+                                : 0}
+                            f]
+                        </span>
                     </div>
                 </div>
             ) : (
-                <div className="drill-list">
-                    {drills.map((drill) => (
-                        <div key={drill.name} className="drill-row">
-                            <span className="drill-name">{drill.name}</span>
-                            <span className="drill-count">{drill.count}</span>
+                <div className={`drill-list`} data-move-count={drills.length > 8 ? "large" : undefined}>
+                    {drills.map((d) => (
+                        <div key={d.name} className="drill-row">
+                            <span className="drill-name">{d.name}</span>
+                            <span className="drill-stats">
+                                {d.count}/{d.attempts}[
+                                {d.count > 0 ? Math.round(d.totalFrames / d.count) : 0}f]
+                            </span>
                         </div>
                     ))}
                 </div>

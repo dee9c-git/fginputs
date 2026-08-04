@@ -1,4 +1,4 @@
-import { Action, Move, SingleMove } from "./types";
+import { Action, Frames, Move, SingleMove } from "./types";
 
 export class ParseError extends Error {
     line: number;
@@ -8,6 +8,11 @@ export class ParseError extends Error {
         this.name = "ParseError";
         this.line = line;
     }
+}
+
+export interface ParseResult {
+    defs: Record<string, unknown>;
+    buttonNames: Record<number, string>;
 }
 
 export const BUTTONS: Record<string, number> = {
@@ -24,19 +29,28 @@ export const BUTTONS: Record<string, number> = {
     b10: 10,
     b11: 11,
     l1: 4,
-    l2: 5,
-    l3: 6,
-    r1: 7,
-    r2: 8,
-    r3: 9,
-    select: 10,
-    start: 11,
     lb: 4,
-    rb: 7,
-    lt: 5,
-    rt: 8,
-    ls: 6,
-    rs: 9,
+    l: 4,
+    r1: 5,
+    rb: 5,
+    r: 5,
+    l2: 6,
+    lt: 6,
+    zl: 6,
+    r2: 7,
+    rt: 7,
+    zr: 7,
+    select: 8,
+    back: 8,
+    share: 8,
+    minus: 8,
+    start: 9,
+    options: 9,
+    plus: 9,
+    l3: 10,
+    ls: 10,
+    r3: 11,
+    rs: 11,
 };
 
 export function parseAddActions(actionStr: string, d: Record<string, unknown>): Action {
@@ -58,7 +72,7 @@ export function parseAddActions(actionStr: string, d: Record<string, unknown>): 
     return new Action(direction, buttons);
 }
 
-export function parseTime(frames: string): [number, number] {
+export function parseFrames(frames: string): Frames {
     if (frames[0] !== "[" || frames[frames.length - 1] !== "]") {
         throw new Error("Frames must be in the form of [min, max]");
     }
@@ -71,7 +85,7 @@ export function parseTime(frames: string): [number, number] {
     if (maxVal > 60) {
         throw new Error("Max frames must be less than or equal to 60");
     }
-    return [parseInt(minFrames.slice(1), 10), maxVal];
+    return new Frames(parseInt(minFrames.slice(1), 10), maxVal);
 }
 
 export function parseSequence(sequence: string, d: Record<string, unknown>): SingleMove[] {
@@ -84,7 +98,7 @@ export function parseSequence(sequence: string, d: Record<string, unknown>): Sin
         } else if (thing.includes("+")) {
             val = parseAddActions(thing, d);
         } else if (thing.includes("[")) {
-            val = parseTime(thing);
+            val = parseFrames(thing);
         } else {
             throw new Error(`Unknown type '${thing}'`);
         }
@@ -92,11 +106,10 @@ export function parseSequence(sequence: string, d: Record<string, unknown>): Sin
             retList.push(new SingleMove(val));
         } else if (val === null) {
             continue
-        } else if (Array.isArray(val)) {
+        } else if (val instanceof Frames) {
             const last = retList[retList.length - 1];
             if (!last) throw new Error("Cannot set frames before any action");
-            last.minFrames = val[0];
-            last.maxFrames = val[1];
+            last.frames = val;
         } else {
             throw new Error("Expected null, Action or frames");
         }
@@ -105,7 +118,7 @@ export function parseSequence(sequence: string, d: Record<string, unknown>): Sin
 }
 
 export function parseRight(theType: string, right: string, d: Record<string, unknown>): unknown {
-    const THE_TYPES = new Set(["int", "input", "time", "move", "null"]);
+    const THE_TYPES = new Set(["int", "input", "frames", "move", "null"]);
     if (!THE_TYPES.has(theType)) {
         throw new Error(`Type '${theType}' not found`);
     }
@@ -120,23 +133,27 @@ export function parseRight(theType: string, right: string, d: Record<string, unk
     if (theType === "input") {
         return parseAddActions(right, d);
     }
-    if (theType === "time") {
-        return parseTime(right);
+    if (theType === "frames") {
+        return parseFrames(right);
     }
-    const [sequence, trigger, bufferStr] = right.split("|");
-    if (!trigger) throw new Error("Move must be in the form of 'sequence | trigger | %buffer'");
-    const move = new Move([], new Action(), 30);
-    move.sequence = parseSequence(sequence.trim(), d);
-    move.trigger = parseAddActions(trigger.trim(), d);
+    const [sequenceSlot, triggerSlot, bufferStr] = right.split("|");
+    if (!triggerSlot) throw new Error("Move must be in the form of 'sequence | trigger | %buffer'");
+    const sequences = sequenceSlot.split(";").map((s) => {
+        if (!s.trim()) throw new Error("Empty sequence alternative");
+        return parseSequence(s.trim(), d);
+    });
+    const triggers = triggerSlot.split(";").map((s) => {
+        if (!s.trim()) throw new Error("Empty trigger alternative");
+        return parseAddActions(s.trim(), d);
+    });
     const buffer = bufferStr.trim();
     if (!buffer.startsWith("%")) {
         throw new Error("Buffer must be in the form of %number");
     }
-    move.buffer = parseInt(buffer.slice(1), 10);
-    return move;
+    return new Move(sequences, triggers, parseInt(buffer.slice(1), 10));
 }
 
-export function parser(fgcText: string): Record<string, unknown> {
+export function parser(fgcText: string): ParseResult {
     const d: Record<string, unknown> = {
         "gamepad.dir.up": new Action([0, 1], new Set()),
         "gamepad.dir.down": new Action([0, -1], new Set()),
@@ -146,6 +163,8 @@ export function parser(fgcText: string): Record<string, unknown> {
     for (const btn of Object.keys(BUTTONS)) {
         d[`gamepad.btn.${btn.toLowerCase()}`] = new Action([0, 0], new Set([BUTTONS[btn]]));
     }
+
+    const buttonNames: Record<number, string> = {};
 
     const lines = fgcText.split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -165,10 +184,17 @@ export function parser(fgcText: string): Record<string, unknown> {
         const [assignType, assignVar] = leftList;
         try {
             d[assignVar] = parseRight(assignType, rightStr, d);
+            if (assignType === "input") {
+                const val = d[assignVar];
+                if (val instanceof Action && val.buttons.size === 1) {
+                    const btn = [...val.buttons][0];
+                    buttonNames[btn] = assignVar;
+                }
+            }
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             throw new ParseError(msg, i + 1);
         }
     }
-    return d;
+    return { defs: d, buttonNames };
 }
