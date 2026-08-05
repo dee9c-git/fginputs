@@ -1,0 +1,70 @@
+import type { Action } from "../fgc/types";
+import type { DrillView, DisplayLine } from "../state/store";
+import InputHistory from "../ui/InputHistory";
+import ControllerDisplay from "../ui/ControllerDisplay";
+
+interface TrainingPageProps {
+    drillViews: DrillView[];
+    selected: string | null;
+    onSelectedChange: (name: string) => void;
+    connected: boolean;
+    currentAction: Action | null;
+    displayLines: DisplayLine[];
+    buttonNames: Record<number, string>;
+}
+
+export default function TrainingPage({
+    drillViews,
+    selected,
+    onSelectedChange,
+    connected,
+    currentAction,
+    displayLines,
+    buttonNames,
+}: TrainingPageProps) {
+    const focused = drillViews.find((d) => d.name === selected) ?? null;
+
+    return (
+        <div className="training-layout">
+            <InputHistory lines={displayLines} />
+            <div className="controller-area">
+                {connected ? (
+                    currentAction && (
+                        <ControllerDisplay action={currentAction} buttonNames={buttonNames} />
+                    )
+                ) : (
+                    <div className="controller-message">
+                        No controller detected. Press a button on your gamepad.
+                    </div>
+                )}
+            </div>
+            {focused && (
+                <div className="drill-focus">
+                    <select
+                        value={selected ?? ""}
+                        onChange={(e) => onSelectedChange(e.target.value)}
+                        className="drill-name"
+                    >
+                        {drillViews.map((d) => (
+                            <option key={d.name} value={d.name}>
+                                {d.name}
+                            </option>
+                        ))}
+                    </select>
+                    <span
+                        className={`drill-combo${focused.missed ? " drill-combo-miss" : ""}`}
+                    >
+                        {focused.missed ? "COMBO: MISS" : `COMBO: x${focused.combo}`}
+                    </span>
+                    <span className="drill-done">
+                        Success Rate:{" "}
+                        {focused.attempts === 0 ? "--/--" : `${focused.count}/${focused.attempts}`} (
+                        {focused.attempts > 0 ? Math.round((focused.count / focused.attempts) * 100) : 0}%) / Time:{" "}
+                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.lastFrames}f`} [
+                        Average: {focused.count > 0 ? Math.round(focused.totalFrames / focused.count) : 0}f]
+                    </span>
+                </div>
+            )}
+        </div>
+    );
+}
