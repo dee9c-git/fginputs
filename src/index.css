@@ -200,7 +200,6 @@ body {
     gap: 8px;
     align-items: stretch;
     padding-right: 20px;
-    border-right: 1px solid #333;
 }
 
 .editor-toolbar button {
@@ -223,16 +222,21 @@ body {
     resize: none;
     background: #0a0a0a;
     color: #ddd;
-    border: 1px solid #333;
+    border: 2px solid #333;
     border-radius: 6px;
     padding: 10px;
     font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1.5;
     tab-size: 4;
     white-space: pre;
     overflow-x: auto;
     overflow-y: auto;
+}
+
+.editor-textarea:focus {
+    outline: none;
+    border: 2px solid #888;
 }
 
 .editor-error {
@@ -253,8 +257,8 @@ body {
 }
 
 .editor {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
     gap: 20px;
     height: 100%;
     min-height: 0;
@@ -396,10 +400,11 @@ body {
 }
 
 .drill-list {
+    height: 100%;
     display: grid;
     justify-content: center;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 16px;
 }
 
 .drill-list[data-move-count="large"] {
@@ -407,7 +412,7 @@ body {
 }
 
 .drill-row {
-    padding: 20px 60px;
+    padding: 40px 80px;
     font-size: 48px;
     line-height: 1.8;
     display: flex;
@@ -416,7 +421,6 @@ body {
 }
 
 .drill-list[data-move-count="large"] .drill-row {
-    padding: 16px;
     font-size: 32px;
     line-height: 1.5;
 }
