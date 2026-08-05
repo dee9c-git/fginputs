@@ -12,7 +12,7 @@ const TRAIL_LIFETIME = 500;
 const TRAIL_POOL = 64;
 const FONT_SIZE = 36;
 
-const OCTAGON_POINTS = (() => {
+const CORNERS: [number, number][] = (() => {
     const dirs: [number, number][] = [
         [1, 0],
         [Math.SQRT1_2, Math.SQRT1_2],
@@ -23,13 +23,24 @@ const OCTAGON_POINTS = (() => {
         [0, -1],
         [Math.SQRT1_2, -Math.SQRT1_2],
     ];
-    return dirs
-        .map(([x, y]) => {
-            const r = x === 0 || y === 0 ? SIDE_RADIUS : CORNER_RADIUS;
-            return `${(BOX_HALF + x * r).toFixed(1)},${(BOX_HALF + y * r).toFixed(1)}`;
-        })
-        .join(" ");
+    return dirs.map(([x, y]) => {
+        const r = x === 0 || y === 0 ? SIDE_RADIUS : CORNER_RADIUS;
+        return [BOX_HALF + x * r, BOX_HALF + y * r];
+    });
 })();
+
+const OCTAGON_POINTS = CORNERS.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+
+const CORNER_INDEX: Record<string, number> = {
+    "1,0": 0,
+    "1,1": 7,
+    "0,1": 6,
+    "-1,1": 5,
+    "-1,0": 4,
+    "-1,-1": 3,
+    "0,-1": 2,
+    "1,-1": 1,
+};
 
 interface Target {
     x: number;
@@ -62,6 +73,10 @@ export default function ControllerDisplay({
     const trailSvgRef = useRef<SVGSVGElement>(null);
     const targetRef = useRef<Target>({ x: 0, y: 0, r: KNOB_RADIUS, pressed: false, text: "" });
     const posRef = useRef({ x: 0, y: 0 });
+    const visitedRef = useRef(new Set<number>());
+    const prevTriggerRef = useRef(false);
+    const lastCommitCornerRef = useRef<number | null>(null);
+    const filledRef = useRef<boolean[]>(Array(CORNERS.length).fill(false));
 
     const [dx, dy] = action.direction;
     const pressed = action.buttons.size > 0;
@@ -78,6 +93,27 @@ export default function ControllerDisplay({
             pressed,
             text,
         };
+    });
+
+    useEffect(() => {
+        const corner = CORNER_INDEX[`${dx},${dy}`] ?? null;
+        if (corner !== null) {
+            if (corner !== lastCommitCornerRef.current) {
+                visitedRef.current.add(corner);
+                filledRef.current[corner] = true;
+            }
+        } else {
+            lastCommitCornerRef.current = null;
+        }
+
+        const triggerPressed = [...action.buttons].some((b) => b !== LT_ID && b !== RT_ID);
+        if (triggerPressed && !prevTriggerRef.current) {
+            const visited = visitedRef.current;
+            filledRef.current = CORNERS.map((_, i) => visited.has(i));
+            visitedRef.current = new Set();
+            lastCommitCornerRef.current = corner;
+        }
+        prevTriggerRef.current = triggerPressed;
     });
 
     useEffect(() => {
@@ -157,8 +193,17 @@ export default function ControllerDisplay({
                         points={OCTAGON_POINTS}
                         fill="#111"
                         stroke="#444"
-                        strokeWidth={5}
+                        strokeWidth={7}
                     />
+                    {CORNERS.map(([cx, cy], i) => (
+                        <circle
+                            key={i}
+                            cx={cx}
+                            cy={cy}
+                            r={10}
+                            fill={filledRef.current[i] ? "#f7343b" : "#444"}
+                        />
+                    ))}
                 </svg>
                 <svg
                     ref={trailSvgRef}

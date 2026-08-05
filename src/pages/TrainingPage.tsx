@@ -34,7 +34,8 @@ export default function TrainingPage({
                     )
                 ) : (
                     <div className="controller-message">
-                        No controller detected. Press a button on your gamepad.
+                        No controller detected <br />
+                        Press a button buddy c:
                     </div>
                 )}
             </div>
@@ -54,14 +55,14 @@ export default function TrainingPage({
                     <span
                         className={`drill-combo${focused.missed ? " drill-combo-miss" : ""}`}
                     >
-                        {focused.missed ? "COMBO: MISS" : `COMBO: x${focused.combo}`}
+                        {(focused.missed || focused.combo === 0) ? "COMBO: --" : `COMBO: x${focused.combo}`}
                     </span>
                     <span className="drill-done">
                         Success Rate:{" "}
                         {focused.attempts === 0 ? "--/--" : `${focused.count}/${focused.attempts}`} (
                         {focused.attempts > 0 ? Math.round((focused.count / focused.attempts) * 100) : 0}%) / Time:{" "}
-                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.lastFrames}f`} [
-                        Average: {focused.count > 0 ? Math.round(focused.totalFrames / focused.count) : 0}f]
+                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.lastFrames}f`}{" "}
+                        [Average: {focused.count > 0 ? `${Math.round(focused.totalFrames / focused.count)}f` : "--"}]
                     </span>
                 </div>
             )}
