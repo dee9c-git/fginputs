@@ -123,7 +123,7 @@ export default function ControllerDisplay({
         for (let i = 0; i < TRAIL_POOL; i++) {
             const line = document.createElementNS(ns, "line");
             line.setAttribute("stroke", "#f7343b");
-            line.setAttribute("stroke-width", (3 * (i + 1)).toString());
+            line.setAttribute("stroke-width", (2 * i + 8).toString());
             line.setAttribute("stroke-linecap", "round");
             line.style.display = "none";
             svg.appendChild(line);
