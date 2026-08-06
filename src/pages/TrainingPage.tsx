@@ -23,6 +23,7 @@ export default function TrainingPage({
     buttonNames,
 }: TrainingPageProps) {
     const focused = drillViews.find((d) => d.name === selected) ?? null;
+    console.log(focused);
 
     return (
         <div className="training-layout">
@@ -61,8 +62,8 @@ export default function TrainingPage({
                         Success Rate:{" "}
                         {focused.attempts === 0 ? "--/--" : `${focused.count}/${focused.attempts}`} (
                         {focused.attempts > 0 ? Math.round((focused.count / focused.attempts) * 100) : 0}%) / Time:{" "}
-                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.lastFrames}f`}{" "}
-                        [Average: {focused.count > 0 ? `${Math.round(focused.totalFrames / focused.count)}f` : "--"}]
+                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.firstInputFrames}+${focused.allFrames - focused.firstInputFrames}f `}
+                        [Average: {focused.count > 0 ? `${Math.round(focused.totalFirstInputFrames / focused.count)}+${Math.round((focused.totalFrames - focused.totalFirstInputFrames) / focused.count)}f` : "--"}]
                     </span>
                 </div>
             )}

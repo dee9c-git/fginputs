@@ -15,6 +15,12 @@ export interface DrillResult {
     miss: boolean;
 }
 
+export interface SequenceMatch {
+    matched: boolean;
+    firstInputFrames: number;
+    allFrames: number;
+}
+
 export function didDrill(
     moveHistory: HistoryEntry[],
     drills: Drill[],
@@ -51,8 +57,10 @@ function evaluateDrill(
                 state.succeeded = true;
                 drill.count += 1;
                 drill.attempts += 1;
-                drill.totalFrames += match.frames;
-                drill.lastFrames = match.frames;
+                drill.firstInputFrames = match.firstInputFrames;
+                drill.allFrames = match.allFrames;
+                drill.totalFirstInputFrames += match.firstInputFrames;
+                drill.totalFrames += match.allFrames;
                 drill.lastMissed = false;
                 drill.combo += 1;
                 drill.missed = false;
@@ -74,12 +82,6 @@ function evaluateDrill(
     return { success, miss };
 }
 
-/*
-function isTriggerHeld(trigger: Action, real: Action): boolean {
-    return isSubset(trigger.buttons, real.buttons);
-}
-*/
-
 // Checks if the entry is a trigger that was just pressed
 function isTriggered(trigger: Action, entry: HistoryEntry): boolean {
     if (entry.frames != 1) return false;
@@ -91,11 +93,6 @@ function isSubset(sub: Set<number>, superSet: Set<number>): boolean {
         if (!superSet.has(btn)) return false;
     }
     return true;
-}
-
-export interface SequenceMatch {
-    matched: boolean;
-    frames: number;
 }
 
 function historyWithinBuffer(moveHistory: HistoryEntry[], buffer: number): HistoryEntry[] {
@@ -113,23 +110,22 @@ function historyWithinBuffer(moveHistory: HistoryEntry[], buffer: number): Histo
 function matchSequence(sequence: SingleMove[], entry: HistoryEntry[]): SequenceMatch {
     let seqIdx = sequence.length - 1;
     let i = entry.length - 1;
-    let lastIdx = -1;
     let firstIdx = -1;
     while (seqIdx >= 0) {
         while (i >= 0 && !matches(sequence[seqIdx], entry[i])) {
             i -= 1;
         }
-        if (i < 0) return { matched: false, frames: -1 };
-        if (lastIdx === -1) lastIdx = i;
+        if (i < 0)
+            return { matched: false, firstInputFrames: -1, allFrames: -1 };
         seqIdx -= 1;
         i -= 1;
     }
     firstIdx = i + 1;
     let frames = 0;
-    for (let j = firstIdx; j <= lastIdx; j++) {
+    for (let j = firstIdx; j <= entry.length - 1; j++) {
         frames += entry[j].frames;
     }
-    return { matched: true, frames: frames };
+    return { matched: true, firstInputFrames: entry[firstIdx].frames, allFrames: frames };
 }
 
 function matchAnySequence(drill: Drill, okHistory: HistoryEntry[]): SequenceMatch {
@@ -137,7 +133,7 @@ function matchAnySequence(drill: Drill, okHistory: HistoryEntry[]): SequenceMatc
         const match = matchSequence(sequence, okHistory);
         if (match.matched) return match;
     }
-    return { matched: false, frames: -1 };
+    return { matched: false, firstInputFrames: -1, allFrames: -1 };
 }
 
 function matches(expected: SingleMove, real: HistoryEntry): boolean {
