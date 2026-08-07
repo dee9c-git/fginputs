@@ -11,6 +11,8 @@ const BOX_HALF = CORNER_RADIUS + PRESSED_KNOB_RADIUS + GATE_PADDING;
 const TRAIL_LIFETIME = 500;
 const TRAIL_POOL = 64;
 const FONT_SIZE = 36;
+const FLASH_DURATION = 500;
+const FLASH_EASE = 3;
 
 const CORNERS: [number, number][] = (() => {
     const dirs: [number, number][] = [
@@ -48,6 +50,7 @@ interface Target {
     r: number;
     pressed: boolean;
     text: string;
+    buttons: Set<number>;
 }
 
 function buttonLabels(buttons: Set<number>, buttonNames: Record<number, string>): string {
@@ -70,13 +73,23 @@ export default function ControllerDisplay({
     buttonNames: Record<number, string>;
 }) {
     const knobRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLDivElement>(null);
     const trailSvgRef = useRef<SVGSVGElement>(null);
-    const targetRef = useRef<Target>({ x: 0, y: 0, r: KNOB_RADIUS, pressed: false, text: "" });
+    const targetRef = useRef<Target>({
+        x: 0,
+        y: 0,
+        r: KNOB_RADIUS,
+        pressed: false,
+        text: "",
+        buttons: new Set<number>(),
+    });
     const posRef = useRef({ x: 0, y: 0 });
     const visitedRef = useRef(new Set<number>());
     const prevTriggerRef = useRef(false);
     const lastCommitCornerRef = useRef<number | null>(null);
     const filledRef = useRef<boolean[]>(Array(CORNERS.length).fill(false));
+    const prevButtonsRef = useRef(new Set<number>());
+    const flashStartRef = useRef(0);
 
     const [dx, dy] = action.direction;
     const pressed = action.buttons.size > 0;
@@ -92,6 +105,7 @@ export default function ControllerDisplay({
             r: knobR,
             pressed,
             text,
+            buttons: action.buttons,
         };
     });
 
@@ -148,6 +162,21 @@ export default function ControllerDisplay({
 
             const dist = Math.hypot(pos.x - prevX, pos.y - prevY);
             const now = performance.now();
+
+            const added = [...target.buttons].some((b) => !prevButtonsRef.current.has(b));
+            if (added) {
+                flashStartRef.current = now;
+                if (textRef.current) {
+                    textRef.current.textContent = target.text;
+                }
+            }
+            prevButtonsRef.current = new Set(target.buttons);
+
+            const flashT = Math.min((now - flashStartRef.current) / FLASH_DURATION, 1);
+            if (textRef.current) {
+                textRef.current.style.opacity = String(Math.pow(1 - flashT, FLASH_EASE));
+            }
+
             if (dist > 0.3) {
                 points.push({ x: pos.x, y: pos.y, t: now });
             }
@@ -218,10 +247,10 @@ export default function ControllerDisplay({
                     style={{
                         width: knobR * 2,
                         height: knobR * 2,
-                        fontSize: pressed ? FONT_SIZE : 0,
+                        fontSize: FONT_SIZE,
                     }}
                 >
-                    {text}
+                    <div ref={textRef} className="stick-knob-text" />
                 </div>
             </div>
         </div>
