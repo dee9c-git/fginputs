@@ -1,6 +1,6 @@
 import DrillEditor from "../ui/DrillEditor";
 
-interface SettingsPageProps {
+interface ConfigPageProps {
   text: string;
   error: string | null;
   onChange: (text: string) => void;
@@ -10,9 +10,9 @@ interface SettingsPageProps {
   onReset: () => void;
 }
 
-export default function SettingsPage(props: SettingsPageProps) {
+export default function ConfigPage(props: ConfigPageProps) {
   return (
-    <div className="settings-page">
+    <div className="config-page">
       <DrillEditor {...props} />
     </div>
   );

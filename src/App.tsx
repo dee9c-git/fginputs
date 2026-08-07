@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { MoveListPage, SettingsPage, TrainingPage, type View } from "./pages";
+import { ConfigPage, MoveListPage, TrainingPage, type View } from "./pages";
 import { useDrillSource } from "./state/useDrillSource";
 import { useDrillTracker } from "./state/store";
 import TopBar from "./ui/TopBar";
 
 export default function App() {
-  const [view, setView] = useState<View>("settings");
+  const [view, setView] = useState<View>("config");
   const [selected, setSelected] = useState<string | null>(null);
 
   const {
@@ -51,8 +51,8 @@ export default function App() {
         displayLines={displayLines}
         buttonNames={buttonNames}
       />
-    ) : view === "settings" ? (
-      <SettingsPage
+    ) : view === "config" ? (
+      <ConfigPage
         text={sourceText}
         error={parseError}
         onChange={onTextChange}

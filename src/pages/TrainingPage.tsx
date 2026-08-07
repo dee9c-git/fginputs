@@ -22,8 +22,8 @@ export default function TrainingPage({
     displayLines,
     buttonNames,
 }: TrainingPageProps) {
-    const focused = drillViews.find((d) => d.name === selected) ?? null;
-    console.log(focused);
+    const trainingDrill = drillViews.find((d) => d.name === selected) ?? null;
+    console.log(trainingDrill);
 
     return (
         <div className="training-layout">
@@ -40,8 +40,8 @@ export default function TrainingPage({
                     </div>
                 )}
             </div>
-            {focused && (
-                <div className="drill-focus">
+            {trainingDrill && (
+                <div className="drill-training">
                     <select
                         value={selected ?? ""}
                         onChange={(e) => onSelectedChange(e.target.value)}
@@ -54,16 +54,16 @@ export default function TrainingPage({
                         ))}
                     </select>
                     <span
-                        className={`drill-combo${focused.missed ? " drill-combo-miss" : ""}`}
+                        className={`drill-combo${trainingDrill.missed ? " drill-combo-miss" : ""}`}
                     >
-                        {(focused.missed || focused.combo === 0) ? "COMBO: --" : `COMBO: x${focused.combo}`}
+                        {(trainingDrill.missed || trainingDrill.combo === 0) ? "COMBO: --" : `COMBO: x${trainingDrill.combo}`}
                     </span>
                     <span className="drill-done">
                         Success Rate:{" "}
-                        {focused.attempts === 0 ? "--/--" : `${focused.count}/${focused.attempts}`} (
-                        {focused.attempts > 0 ? Math.round((focused.count / focused.attempts) * 100) : 0}%) / Time:{" "}
-                        {focused.attempts === 0 ? "--" : focused.lastMissed ? "--" : `${focused.firstInputFrames}+${focused.allFrames - focused.firstInputFrames}f `}
-                        [Average: {focused.count > 0 ? `${Math.round(focused.totalFirstInputFrames / focused.count)}+${Math.round((focused.totalFrames - focused.totalFirstInputFrames) / focused.count)}f` : "--"}]
+                        {trainingDrill.attempts === 0 ? "--/--" : `${trainingDrill.count}/${trainingDrill.attempts}`} (
+                        {trainingDrill.attempts > 0 ? Math.round((trainingDrill.count / trainingDrill.attempts) * 100) : 0}%) / Time:{" "}
+                        {trainingDrill.attempts === 0 ? "--" : trainingDrill.lastMissed ? "--" : `${trainingDrill.firstInputFrames}+${trainingDrill.allFrames - trainingDrill.firstInputFrames}f `}
+                        [Average: {trainingDrill.count > 0 ? `${Math.round(trainingDrill.totalFirstInputFrames / trainingDrill.count)}+${Math.round((trainingDrill.totalFrames - trainingDrill.totalFirstInputFrames) / trainingDrill.count)}f` : "--"}]
                     </span>
                 </div>
             )}

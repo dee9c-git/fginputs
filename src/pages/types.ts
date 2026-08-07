@@ -1,1 +1,1 @@
-export type View = "moves" | "training" | "settings";
+export type View = "moves" | "training" | "config";

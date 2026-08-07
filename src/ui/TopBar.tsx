@@ -15,10 +15,10 @@ export default function TopBar({
             <input
               type="radio"
               name="drill-view"
-              checked={view === "settings"}
-              onChange={() => onChange("settings")}
+              checked={view === "config"}
+              onChange={() => onChange("config")}
             />
-            <span className="radio-item">Settings</span>
+            <span className="radio-item">Config</span>
           </label>
           <label className="radio">
             <input

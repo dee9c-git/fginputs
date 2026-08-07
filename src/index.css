@@ -250,7 +250,7 @@ body {
     word-break: break-word;
 }
 
-.settings-page {
+.config-page {
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -503,7 +503,7 @@ body {
     font-size: 14px;
 }
 
-.drill-focus {
+.drill-training {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -511,7 +511,7 @@ body {
     padding: 100px 0px;
 }
 
-.drill-focus .drill-name {
+.drill-training .drill-name {
     max-width: 60%;
     font-size: 48px;
     line-height: 1.8;
@@ -523,7 +523,7 @@ body {
     border-radius: 20px;
 }
 
-.drill-focus-stats {
+.drill-training-stats {
     display: flex;
     flex-direction: column;
     align-items: center;

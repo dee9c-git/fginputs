@@ -25,7 +25,7 @@ export interface DrillView {
 export function useDrillTracker(
     drills: Drill[] | null,
     buttonNames: Record<number, string>,
-    focusName: string | null,
+    trainingName: string | null,
 ) {
     const [connected, setConnected] = useState(false);
     const [displayLines, setDisplayLines] = useState<DisplayLine[]>([]);
@@ -35,8 +35,8 @@ export function useDrillTracker(
     const buttonNamesRef = useRef(buttonNames);
     buttonNamesRef.current = buttonNames;
 
-    const focusNameRef = useRef(focusName);
-    focusNameRef.current = focusName;
+    const trainingNameRef = useRef(trainingName);
+    trainingNameRef.current = trainingName;
 
     const toDrillViews = useCallback(
         (d: Drill[]): DrillView[] =>
@@ -64,7 +64,7 @@ export function useDrillTracker(
 
     useEffect(() => {
         stateRef.current.attempts.clear();
-    }, [focusName]);
+    }, [trainingName]);
 
     const drillsRef = useRef(drills);
     drillsRef.current = drills;
@@ -112,7 +112,7 @@ export function useDrillTracker(
 
         const d = drillsRef.current;
         if (d && d.length > 0 && validHistory.length > 0) {
-            const result = didDrill(validHistory, d, state.attempts, focusNameRef.current);
+            const result = didDrill(validHistory, d, state.attempts, trainingNameRef.current);
             if (result.success) {
                 state.lastMoveIdx = state.moveHistory.length - 1;
                 state.anyDrill = true;
@@ -132,7 +132,7 @@ export function useDrillTracker(
     }, [toDrillViews]);
 
     useEffect(() => {
-        if (!focusName) return;
+        if (!trainingName) return;
         let raf = 0;
         const loop = () => {
             update();
@@ -140,7 +140,7 @@ export function useDrillTracker(
         };
         raf = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(raf);
-    }, [update, focusName]);
+    }, [update, trainingName]);
 
     return { connected, currentAction, displayLines, drillViews };
 }

@@ -25,10 +25,10 @@ export function didDrill(
     moveHistory: HistoryEntry[],
     drills: Drill[],
     attempts: Map<Drill, DrillAttempt>,
-    focus?: string | null,
+    trainingName?: string | null,
 ): DrillResult {
-    if (!focus) return { success: false, miss: false };
-    const drill = drills.find((d) => d.name === focus);
+    if (!trainingName) return { success: false, miss: false };
+    const drill = drills.find((d) => d.name === trainingName);
     if (!drill) return { success: false, miss: false };
     return evaluateDrill(drill, moveHistory, attempts);
 }
