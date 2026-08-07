@@ -112,13 +112,29 @@ function matchSequence(sequence: SingleMove[], entry: HistoryEntry[]): SequenceM
     let i = entry.length - 1;
     let firstIdx = -1;
     while (seqIdx >= 0) {
+        /*
         while (i >= 0 && !matches(sequence[seqIdx], entry[i])) {
             i -= 1;
         }
-        if (i < 0)
+        */
+        while (i >= 0) {
+            if (!buttonsMatch(sequence[seqIdx], entry[i])) {
+                i -= 1;
+            } else {
+                let currentFrames = (i == entry.length - 1) ? 0 : entry[i].frames;
+                i -= 1;
+                while (i >= 0 && buttonsMatch(sequence[seqIdx], entry[i])) {
+                    currentFrames += entry[i].frames;
+                    i -= 1;
+                }
+                if (framesMatch(sequence[seqIdx], currentFrames)) {
+                    seqIdx -= 1;
+                    break;
+                }
+            }
+        }
+        if (i < 0 && seqIdx >= 0)
             return { matched: false, firstInputFrames: -1, allFrames: -1 };
-        seqIdx -= 1;
-        i -= 1;
     }
     firstIdx = i + 1;
     let frames = 0;
@@ -136,12 +152,15 @@ function matchAnySequence(drill: Drill, okHistory: HistoryEntry[]): SequenceMatc
     return { matched: false, firstInputFrames: -1, allFrames: -1 };
 }
 
-function matches(expected: SingleMove, real: HistoryEntry): boolean {
+function buttonsMatch(expected: SingleMove, real: HistoryEntry): boolean {
     return (
         expected.action.direction[0] === real.action.direction[0] &&
         expected.action.direction[1] === real.action.direction[1] &&
-        isSubset(expected.action.buttons, real.action.buttons) &&
-        expected.frames.min <= real.frames &&
-        expected.frames.max >= real.frames
+        isSubset(expected.action.buttons, real.action.buttons)
     );
+}
+
+
+function framesMatch(expected: SingleMove, frames: number): boolean {
+    return expected.frames.min <= frames && expected.frames.max >= frames
 }

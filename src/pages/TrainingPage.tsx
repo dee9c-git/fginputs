@@ -23,8 +23,6 @@ export default function TrainingPage({
     buttonNames,
 }: TrainingPageProps) {
     const trainingDrill = drillViews.find((d) => d.name === selected) ?? null;
-    console.log(trainingDrill);
-
     return (
         <div className="training-layout">
             <InputHistory lines={displayLines} />
