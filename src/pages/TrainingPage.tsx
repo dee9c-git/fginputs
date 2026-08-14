@@ -1,5 +1,6 @@
 import type { Action } from "../fgc/types";
 import type { DrillView, DisplayLine } from "../state/store";
+import Dropdown from "../ui/Dropdown";
 import InputHistory from "../ui/InputHistory";
 import ControllerDisplay from "../ui/ControllerDisplay";
 
@@ -40,17 +41,12 @@ export default function TrainingPage({
             </div>
             {trainingDrill && (
                 <div className="drill-training">
-                    <select
+                    <Dropdown
                         value={selected ?? ""}
-                        onChange={(e) => onSelectedChange(e.target.value)}
+                        options={drillViews.map((d) => d.name)}
+                        onChange={onSelectedChange}
                         className="drill-name"
-                    >
-                        {drillViews.map((d) => (
-                            <option key={d.name} value={d.name}>
-                                {d.name}
-                            </option>
-                        ))}
-                    </select>
+                    />
                     <span
                         className={`drill-combo${trainingDrill.missed ? " drill-combo-miss" : ""}`}
                     >

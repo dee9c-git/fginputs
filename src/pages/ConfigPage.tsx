@@ -3,6 +3,9 @@ import DrillEditor from "../ui/DrillEditor";
 interface ConfigPageProps {
   text: string;
   error: string | null;
+  fileNames: string[];
+  currentFile: string | null;
+  onSelectFile: (name: string) => void;
   onChange: (text: string) => void;
   onApply: () => void;
   onDownload: () => void;

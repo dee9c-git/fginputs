@@ -11,7 +11,9 @@ export default function App() {
   const {
     drills,
     buttonNames,
-    sourceText,
+    text,
+    fileNames,
+    currentFile,
     parseError,
     error,
     onTextChange,
@@ -19,6 +21,7 @@ export default function App() {
     onDownload,
     onImport,
     onReset,
+    onSelectFile,
   } = useDrillSource();
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export default function App() {
   if (error) {
     return <div className="status">Error: {error}</div>;
   }
-  if (!drills || sourceText === null) {
+  if (!drills || currentFile === null) {
     return <div className="status">Loading drills...</div>;
   }
 
@@ -53,8 +56,11 @@ export default function App() {
       />
     ) : view === "config" ? (
       <ConfigPage
-        text={sourceText}
+        text={text}
         error={parseError}
+        fileNames={fileNames}
+        currentFile={currentFile}
+        onSelectFile={onSelectFile}
         onChange={onTextChange}
         onApply={onApply}
         onDownload={onDownload}

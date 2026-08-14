@@ -3,6 +3,9 @@ import { useRef } from "react";
 interface DrillEditorProps {
     text: string;
     error: string | null;
+    fileNames: string[];
+    currentFile: string | null;
+    onSelectFile: (name: string) => void;
     onChange: (text: string) => void;
     onApply: () => void;
     onDownload: () => void;
@@ -13,6 +16,9 @@ interface DrillEditorProps {
 export default function DrillEditor({
     text,
     error,
+    fileNames,
+    currentFile,
+    onSelectFile,
     onChange,
     onApply,
     onDownload,
@@ -46,6 +52,17 @@ export default function DrillEditor({
                 {error && <div className="editor-error">{error}</div>}
             </div>
             <div className="editor-toolbar">
+                <select
+                    className="file-selector"
+                    value={currentFile ?? ""}
+                    onChange={(e) => onSelectFile(e.target.value)}
+                >
+                    {fileNames.map((name) => (
+                        <option key={name} value={name}>
+                            {name}
+                        </option>
+                    ))}
+                </select>
                 <button onClick={onApply}>Apply</button>
                 <button onClick={onDownload}>Download</button>
                 <button onClick={() => fileInputRef.current?.click()}>Import</button>

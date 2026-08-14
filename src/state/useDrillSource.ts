@@ -1,8 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Move, type Drill } from "../fgc/types";
 import { parser, ParseError } from "../fgc/parser";
 
 const LS_KEY = "fgc.source";
+const LS_FILE = "fgc.lastFile";
+const MANIFEST_URL = "/fgc_files/manifest.json";
+
+const sourceKey = (name: string) => `${LS_KEY}.${name}`;
 
 function loadDrills(text: string): { drills: Drill[]; buttonNames: Record<number, string> } {
     const { defs, buttonNames } = parser(text);
@@ -39,88 +43,126 @@ export function useDrillSource() {
     const [drills, setDrills] = useState<Drill[] | null>(null);
     const [buttonNames, setButtonNames] = useState<Record<number, string>>({});
     const [error, setError] = useState<string | null>(null);
-    const [sourceText, setSourceText] = useState<string | null>(null);
-    const [defaultText, setDefaultText] = useState("");
+    const [fileNames, setFileNames] = useState<string[]>([]);
+    const [currentFile, setCurrentFile] = useState<string | null>(null);
+    const [text, setText] = useState("");
     const [parseError, setParseError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetch("/fgc_files/ggst.fgc")
-            .then((res) => {
-                if (!res.ok) throw new Error(`Failed to load ggst.fgc (${res.status})`);
-                return res.text();
-            })
-            .then((text) => {
-                setDefaultText(text);
-                const saved = localStorage.getItem(LS_KEY);
-                const initial = saved ?? text;
-                setSourceText(initial);
-                try {
-                    const result = loadDrills(initial);
-                    setDrills(result.drills);
-                    setButtonNames(result.buttonNames);
-                    setParseError(null);
-                } catch (err) {
-                    setParseError(formatError(err));
-                    const result = loadDrills(text);
-                    setDrills(result.drills);
-                    setButtonNames(result.buttonNames);
-                }
-            })
-            .catch((err) => setError(String(err)));
-    }, []);
+    const textsRef = useRef<Record<string, string>>({});
+    const defaultsRef = useRef<Record<string, string>>({});
 
-    const onTextChange = useCallback((text: string) => {
-        setSourceText(text);
-        localStorage.setItem(LS_KEY, text);
-    }, []);
-
-    const onApply = useCallback(() => {
-        if (sourceText === null) return;
+    const parse = useCallback((text: string) => {
         try {
-            const result = loadDrills(sourceText);
+            const result = loadDrills(text);
             setDrills(result.drills);
             setButtonNames(result.buttonNames);
             setParseError(null);
         } catch (err) {
             setParseError(formatError(err));
         }
-    }, [sourceText]);
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetch(MANIFEST_URL)
+            .then((res) => {
+                if (!res.ok) throw new Error(`Failed to load ${MANIFEST_URL} (${res.status})`);
+                return res.json() as Promise<string[]>;
+            })
+            .then(async (names) => {
+                const texts: Record<string, string> = {};
+                const defaults: Record<string, string> = {};
+                for (const name of names) {
+                    const res = await fetch(`/fgc_files/${name}`);
+                    if (!res.ok) throw new Error(`Failed to load ${name} (${res.status})`);
+                    const defaultText = await res.text();
+                    defaults[name] = defaultText;
+                    texts[name] = localStorage.getItem(sourceKey(name)) ?? defaultText;
+                }
+                if (cancelled) return;
+                textsRef.current = texts;
+                defaultsRef.current = defaults;
+                setFileNames(names);
+                const last = localStorage.getItem(LS_FILE);
+                const initial = last && names.includes(last) ? last : names[0];
+                setCurrentFile(initial);
+                setText(texts[initial]);
+                parse(texts[initial]);
+            })
+            .catch((err) => setError(String(err)));
+        return () => {
+            cancelled = true;
+        };
+    }, [parse]);
+
+    const onSelectFile = useCallback(
+        (name: string) => {
+            if (name === currentFile) return;
+            setCurrentFile(name);
+            localStorage.setItem(LS_FILE, name);
+            const t = textsRef.current[name];
+            setText(t);
+            parse(t);
+        },
+        [currentFile, parse],
+    );
+
+    const onTextChange = useCallback(
+        (text: string) => {
+            if (currentFile === null) return;
+            setText(text);
+            textsRef.current[currentFile] = text;
+            localStorage.setItem(sourceKey(currentFile), text);
+        },
+        [currentFile],
+    );
+
+    const onApply = useCallback(() => {
+        if (currentFile === null) return;
+        parse(textsRef.current[currentFile]);
+    }, [currentFile, parse]);
 
     const onDownload = useCallback(() => {
-        if (sourceText === null) return;
-        const blob = new Blob([sourceText], { type: "text/plain" });
+        if (currentFile === null) return;
+        const blob = new Blob([textsRef.current[currentFile]], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "ggst.fgc";
+        a.download = currentFile;
         a.click();
         URL.revokeObjectURL(url);
-    }, [sourceText]);
+    }, [currentFile]);
 
-    const onImport = useCallback((file: File) => {
-        file
-            .text()
-            .then((text) => {
-                setSourceText(text);
-                localStorage.setItem(LS_KEY, text);
-            })
-            .catch((err) => setParseError(formatError(err)));
-    }, []);
+    const onImport = useCallback(
+        (file: File) => {
+            if (currentFile === null) return;
+            file
+                .text()
+                .then((text) => {
+                    textsRef.current[currentFile] = text;
+                    setText(text);
+                    localStorage.setItem(sourceKey(currentFile), text);
+                })
+                .catch((err) => setParseError(formatError(err)));
+        },
+        [currentFile],
+    );
 
     const onReset = useCallback(() => {
-        setSourceText(defaultText);
-        localStorage.removeItem(LS_KEY);
-        const result = loadDrills(defaultText);
-        setDrills(result.drills);
-        setButtonNames(result.buttonNames);
-        setParseError(null);
-    }, [defaultText]);
+        if (currentFile === null) return;
+        const defaultText = defaultsRef.current[currentFile];
+        textsRef.current[currentFile] = defaultText;
+        localStorage.removeItem(sourceKey(currentFile));
+        setText(defaultText);
+        parse(defaultText);
+    }, [currentFile, parse]);
 
     return {
         drills,
         buttonNames,
-        sourceText,
-        defaultText,
+        text,
+        fileNames,
+        currentFile,
         parseError,
         error,
         onTextChange,
@@ -128,5 +170,6 @@ export function useDrillSource() {
         onDownload,
         onImport,
         onReset,
+        onSelectFile,
     };
 }

@@ -199,7 +199,7 @@ body {
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
-    padding-right: 20px;
+    padding-left: 20px;
 }
 
 .editor-toolbar button {
@@ -215,6 +215,18 @@ body {
 
 .editor-toolbar button:hover {
     background: #262626;
+}
+
+.editor-toolbar .file-selector {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 0.5rem 0.5rem;
+    font-family: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: center;
 }
 
 .editor-textarea {
@@ -518,7 +530,6 @@ body {
 }
 
 .drill-training .drill-name {
-    max-width: 60%;
     font-size: 48px;
     line-height: 1.8;
     color: #ffffff;
@@ -527,6 +538,59 @@ body {
     border: 2px solid #ddd;
     padding: 25px 50px;
     border-radius: 20px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.drill-training .drill-name:hover {
+    border-color: gold;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 24px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    width: 700px;
+    max-width: 90vw;
+    max-height: 225px;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 24px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.dropdown-menu li[aria-selected="true"] button {
+    color: gold;
+}
+
+.dropdown-menu button:hover {
+    background: #333;
 }
 
 .drill-training-stats {

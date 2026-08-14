@@ -1,4 +1,4 @@
-// Types: int, input, frames, move, null
+// Types: input, frames, move, null
 // Special symbols: =, |, ;, ~, +, %, [, ], /. These cannot be used as variable names. Note that symbols like !@#$<>^*~ can be used.
 // this is a comment
 
