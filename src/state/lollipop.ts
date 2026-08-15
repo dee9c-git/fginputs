@@ -6,13 +6,14 @@ export interface LollipopView {
 }
 
 export interface LollipopState {
-    mode: "idle" | "counting" | "locked";
+    active: boolean;
     count: number;
     prevTrigger: boolean;
+    prevLastInput: boolean;
 }
 
 export function createLollipopState(): LollipopState {
-    return { mode: "idle", count: 0, prevTrigger: false };
+    return { active: false, count: 0, prevTrigger: false, prevLastInput: false };
 }
 
 function lastInputMatch(sequences: SingleMove[][], action: Action): boolean {
@@ -34,43 +35,24 @@ export function updateLollipop(
     state: LollipopState,
     move: Move,
     frameAction: Action,
-    firstFrame: boolean,
-): void {
+): LollipopView | null {
     const lastInput = lastInputMatch(move.sequences, frameAction);
-    const lastInputPressed = lastInput && firstFrame;
+    const lastInputFresh = lastInput && !state.prevLastInput;
+    state.prevLastInput = lastInput;
+
     const trigger = triggerMatch(move.triggers, frameAction);
     const triggerPressed = trigger && !state.prevTrigger;
     state.prevTrigger = trigger;
 
-    switch (state.mode) {
-        case "idle":
-            if (lastInputPressed) {
-                if (triggerPressed) {
-                    state.mode = "locked";
-                    state.count = 0;
-                } else {
-                    state.mode = "counting";
-                    state.count = 0;
-                }
-            }
-            break;
-        case "counting":
-            if (triggerPressed) {
-                state.mode = "locked";
-            } else {
-                state.count += 1;
-            }
-            break;
-        case "locked":
-            if (lastInputPressed) {
-                if (triggerPressed) {
-                    state.mode = "locked";
-                    state.count = 0;
-                } else {
-                    state.mode = "counting";
-                    state.count = 0;
-                }
-            }
-            break;
+    if (lastInputFresh) {
+        state.count = 0;
+        state.active = true;
+    } else if (state.active) {
+        state.count += 1;
     }
+
+    if (triggerPressed && state.active) {
+        return { active: true, count: state.count };
+    }
+    return null;
 }

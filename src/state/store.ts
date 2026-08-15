@@ -140,8 +140,8 @@ export function useDrillTracker(
 
         const trainingDrill = d?.find((drill) => drill.name === trainingNameRef.current) ?? null;
         if (trainingDrill) {
-            updateLollipop(lollipopRef.current, trainingDrill.move, frameAction, state.currentFrames === 1);
-            setLollipop({ active: lollipopRef.current.mode === "locked", count: lollipopRef.current.count });
+            const view = updateLollipop(lollipopRef.current, trainingDrill.move, frameAction);
+            if (view) setLollipop(view);
         } else {
             resetLollipop();
         }
