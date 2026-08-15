@@ -118,11 +118,13 @@ function matchSequence(sequence: SingleMove[], entry: HistoryEntry[]): SequenceM
             i -= 1;
         }
         */
+        let currentFrames = 0;
         while (i >= 0) {
             if (!buttonsMatch(sequence[seqIdx], entry[i])) {
+                currentFrames += (i == entry.length - 1) ? 0 : entry[i].frames;
                 i -= 1;
             } else {
-                let currentFrames = (i == entry.length - 1) ? 0 : entry[i].frames;
+                currentFrames += (i == entry.length - 1) ? 0 : entry[i].frames;
                 i -= 1;
                 while (i >= 0 && buttonsMatch(sequence[seqIdx], entry[i])) {
                     currentFrames += entry[i].frames;

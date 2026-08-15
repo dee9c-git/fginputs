@@ -3,6 +3,12 @@ import type { Action, Drill } from "../fgc/types";
 import { actionToStr } from "../fgc/mappings";
 import { didDrill, type DrillAttempt, type HistoryEntry } from "../fgc/matcher";
 import { buildAction, pollGamepad } from "../input/gamepad";
+import {
+    createLollipopState,
+    type LollipopState,
+    type LollipopView,
+    updateLollipop,
+} from "./lollipop";
 
 export interface DisplayLine {
     text: string;
@@ -31,6 +37,14 @@ export function useDrillTracker(
     const [displayLines, setDisplayLines] = useState<DisplayLine[]>([]);
     const [drillViews, setDrillViews] = useState<DrillView[]>([]);
     const [currentAction, setCurrentAction] = useState<Action | null>(null);
+    const [lollipop, setLollipop] = useState<LollipopView>({ active: false, count: 0 });
+
+    const lollipopRef = useRef<LollipopState>(createLollipopState());
+
+    const resetLollipop = useCallback(() => {
+        lollipopRef.current = createLollipopState();
+        setLollipop({ active: false, count: 0 });
+    }, []);
 
     const buttonNamesRef = useRef(buttonNames);
     buttonNamesRef.current = buttonNames;
@@ -60,11 +74,13 @@ export function useDrillTracker(
             setDrillViews(toDrillViews(drills));
         }
         stateRef.current.attempts.clear();
-    }, [drills, toDrillViews]);
+        resetLollipop();
+    }, [drills, toDrillViews, resetLollipop]);
 
     useEffect(() => {
         stateRef.current.attempts.clear();
-    }, [trainingName]);
+        resetLollipop();
+    }, [trainingName, resetLollipop]);
 
     const drillsRef = useRef(drills);
     drillsRef.current = drills;
@@ -122,6 +138,14 @@ export function useDrillTracker(
             }
         }
 
+        const trainingDrill = d?.find((drill) => drill.name === trainingNameRef.current) ?? null;
+        if (trainingDrill) {
+            updateLollipop(lollipopRef.current, trainingDrill.move, frameAction, state.currentFrames === 1);
+            setLollipop({ active: lollipopRef.current.mode === "locked", count: lollipopRef.current.count });
+        } else {
+            resetLollipop();
+        }
+
         const lines: DisplayLine[] = state.moveHistory.slice(-19).map((h) => ({
             text: actionToStr(h.action, buttonNamesRef.current),
             frames: h.frames,
@@ -129,7 +153,7 @@ export function useDrillTracker(
         lines.push({ text: actionToStr(state.currentAction, buttonNamesRef.current), frames: state.currentFrames });
         lines.reverse();
         setDisplayLines(lines);
-    }, [toDrillViews]);
+    }, [toDrillViews, resetLollipop]);
 
     useEffect(() => {
         if (!trainingName) return;
@@ -142,5 +166,5 @@ export function useDrillTracker(
         return () => cancelAnimationFrame(raf);
     }, [update, trainingName]);
 
-    return { connected, currentAction, displayLines, drillViews };
+    return { connected, currentAction, displayLines, drillViews, lollipop };
 }

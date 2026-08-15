@@ -30,7 +30,7 @@ export default function App() {
     }
   }, [drills, selected]);
 
-  const { connected, currentAction, displayLines, drillViews } = useDrillTracker(
+  const { connected, currentAction, displayLines, drillViews, lollipop } = useDrillTracker(
     drills,
     buttonNames,
     view === "training" ? selected : null,
@@ -53,6 +53,7 @@ export default function App() {
         currentAction={currentAction}
         displayLines={displayLines}
         buttonNames={buttonNames}
+        lollipop={lollipop}
       />
     ) : view === "config" ? (
       <ConfigPage

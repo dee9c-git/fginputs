@@ -50,7 +50,7 @@ export function updateLollipop(
                     state.count = 0;
                 } else {
                     state.mode = "counting";
-                    state.count = 1;
+                    state.count = 0;
                 }
             }
             break;
@@ -62,9 +62,14 @@ export function updateLollipop(
             }
             break;
         case "locked":
-            if (triggerPressed) {
-                state.mode = "idle";
-                state.count = 0;
+            if (lastInputPressed) {
+                if (triggerPressed) {
+                    state.mode = "locked";
+                    state.count = 0;
+                } else {
+                    state.mode = "counting";
+                    state.count = 0;
+                }
             }
             break;
     }

@@ -1,8 +1,10 @@
 import type { Action } from "../fgc/types";
+import type { LollipopView } from "../state/lollipop";
 import type { DrillView, DisplayLine } from "../state/store";
 import Dropdown from "../ui/Dropdown";
 import InputHistory from "../ui/InputHistory";
 import ControllerDisplay from "../ui/ControllerDisplay";
+import Lollipop from "../ui/Lollipop";
 
 interface TrainingPageProps {
     drillViews: DrillView[];
@@ -12,6 +14,7 @@ interface TrainingPageProps {
     currentAction: Action | null;
     displayLines: DisplayLine[];
     buttonNames: Record<number, string>;
+    lollipop: LollipopView;
 }
 
 export default function TrainingPage({
@@ -22,6 +25,7 @@ export default function TrainingPage({
     currentAction,
     displayLines,
     buttonNames,
+    lollipop,
 }: TrainingPageProps) {
     const trainingDrill = drillViews.find((d) => d.name === selected) ?? null;
     return (
@@ -30,7 +34,10 @@ export default function TrainingPage({
             <div className="controller-area">
                 {connected ? (
                     currentAction && (
-                        <ControllerDisplay action={currentAction} buttonNames={buttonNames} />
+                        <>
+                            <ControllerDisplay action={currentAction} buttonNames={buttonNames} />
+                            <Lollipop lollipop={lollipop} />
+                        </>
                     )
                 ) : (
                     <div className="controller-message">
