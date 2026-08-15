@@ -338,6 +338,9 @@ body {
     justify-content: center;
     font-size: 18px;
     user-select: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
 }
 
 .lollipop-zero {
@@ -348,8 +351,12 @@ body {
 
 .lollipop-active {
     background-color: #ff3b3b;
-    border-color: #ff3b3b;
     color: #ffffff;
+    border: none;
+}
+
+.lollipop-toggled {
+    border: 2px solid #ffffff;
 }
 
 .stick-gate {

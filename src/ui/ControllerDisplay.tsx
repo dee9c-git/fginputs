@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Action } from "../fgc/types";
 import { BUTTON_NAMES, LT_ID, RT_ID } from "../fgc/mappings";
 
@@ -90,6 +90,20 @@ export default function ControllerDisplay({
     const filledRef = useRef<boolean[]>(Array(CORNERS.length).fill(false));
     const prevButtonsRef = useRef(new Set<number>());
     const flashStartRef = useRef(0);
+
+    const [toggled, setToggled] = useState<Set<number>>(new Set());
+
+    const toggleCorner = (i: number) => {
+        setToggled((prev) => {
+            const next = new Set(prev);
+            if (next.has(i)) {
+                next.delete(i);
+            } else {
+                next.add(i);
+            }
+            return next;
+        });
+    };
 
     const [dx, dy] = action.direction;
     const pressed = action.buttons.size > 0;
@@ -224,15 +238,23 @@ export default function ControllerDisplay({
                         stroke="#444"
                         strokeWidth={7}
                     />
-                    {CORNERS.map(([cx, cy], i) => (
-                        <circle
-                            key={i}
-                            cx={cx}
-                            cy={cy}
-                            r={10}
-                            fill={filledRef.current[i] ? "#f7343b" : "#444"}
-                        />
-                    ))}
+                    {CORNERS.map(([cx, cy], i) => {
+                        const red = filledRef.current[i];
+                        const stroke = red ? "#f7343b" : toggled.has(i) ? "#ffffff" : "#444";
+                        return (
+                            <circle
+                                key={i}
+                                cx={cx}
+                                cy={cy}
+                                r={10}
+                                fill={red ? "#f7343b" : "#444"}
+                                stroke={stroke}
+                                strokeWidth={2}
+                                onClick={() => toggleCorner(i)}
+                                style={{ cursor: "pointer", pointerEvents: "auto" }}
+                            />
+                        );
+                    })}
                 </svg>
                 <svg
                     ref={trailSvgRef}
