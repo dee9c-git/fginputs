@@ -4,8 +4,8 @@
 
 // The type has to be specified for each variable at the beginning of the line.
 // null give the variable the meaning of nothing, it will be ignored in combos
-// Yes, the variable name is literally ">" c:
-null > = null
+// Yes, the variable name is literally ">>" c:
+null >> = null
 
 
 // %number is an integer, as numbers are used as directions for numpad notation
@@ -34,6 +34,7 @@ input D = gamepad.btn.rs // same as gamepad.btn.b9
 
 // frames give a range of frames to wait for, with the syntax [%start,%end], no spaces are allowed
 // plink inputs have a strict 1~2 frame window, so I set ~ to be 1~2 frames
+frames > = [%0,%5]
 frames ~ = [%1,%2]
 
 
@@ -58,11 +59,9 @@ move mega_fist = 2 3 6 [%0,%5] | P | %15
 
 // use ; to give a move multiple sequences or triggers:
 // move x = seq1 ; seq2 | trig1 ; trig2 | %buffer
+// we will use > for the frames now
 
-move pot_buster = 6 2 4 6 [%0,%5] | P | %30
-move pot_buster_360 = 4 2 6 8 [%0,%5] | P | %30
-
-
+move pot_buster = 6 2 4 6 > | P | %30
+move pot_buster_360 = 4 2 6 8 > | P | %30
 move kara_pot_buster = 6 2 4 6 6+K ~ | P | %30
-// move kara_pot_buster = 6 2 4 6 6+K [%1,%2] | P | %30
 

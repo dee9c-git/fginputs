@@ -48,7 +48,7 @@ export default function TrainingPage({
                         className="drill-name"
                     />
                     <span
-                        className={`drill-combo${trainingDrill.missed ? " drill-combo-miss" : ""}`}
+                        className={`drill-combo${trainingDrill.missed || trainingDrill.combo === 0 ? " drill-combo-idle" : ""}`}
                     >
                         {(trainingDrill.missed || trainingDrill.combo === 0) ? "COMBO: --" : `COMBO: x${trainingDrill.combo}`}
                     </span>
@@ -56,7 +56,7 @@ export default function TrainingPage({
                         Success Rate:{" "}
                         {trainingDrill.attempts === 0 ? "--/--" : `${trainingDrill.count}/${trainingDrill.attempts}`} (
                         {trainingDrill.attempts > 0 ? Math.round((trainingDrill.count / trainingDrill.attempts) * 100) : 0}%) / Time:{" "}
-                        {trainingDrill.attempts === 0 ? "--" : trainingDrill.lastMissed ? "--" : `${trainingDrill.firstInputFrames}+${trainingDrill.allFrames - trainingDrill.firstInputFrames}f `}
+                        {trainingDrill.attempts === 0 ? "--" : trainingDrill.lastMissed ? "--" : `${trainingDrill.firstInputFrames}+${trainingDrill.allFrames - trainingDrill.firstInputFrames}f`}{" "}
                         [Average: {trainingDrill.count > 0 ? `${Math.round(trainingDrill.totalFirstInputFrames / trainingDrill.count)}+${Math.round((trainingDrill.totalFrames - trainingDrill.totalFirstInputFrames) / trainingDrill.count)}f` : "--"}]
                     </span>
                 </div>

@@ -7,7 +7,7 @@ export default function MoveListPage({ drillViews }: { drillViews: DrillView[] }
                 <div key={d.name} className="drill-row">
                     <span className="drill-name">{d.name}</span>
                     <span className="drill-stats">
-                        {d.attempts > 0 ? `${d.count}/${d.attempts}` : "--/--"} [
+                        {d.attempts > 0 ? `${Math.round((d.count / d.attempts) * 100)}%` : "--%"} [
                         {d.count > 0 ? `${Math.round(d.totalFirstInputFrames / d.count)}+${Math.round((d.totalFrames - d.totalFirstInputFrames) / d.count)}f` : "--"}]
                     </span>
                 </div>
