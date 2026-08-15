@@ -41,7 +41,8 @@ function evaluateDrill(
     let success = false;
     let miss = false;
     const lastEntry = moveHistory[moveHistory.length - 1];
-    const triggered = drill.move.triggers.some((t) => isTriggered(t, lastEntry));
+    const secondLastEntry = moveHistory[moveHistory.length - 2];
+    const triggered = drill.move.triggers.some((t) => isTriggered(t, lastEntry, secondLastEntry));
     const state = attempts.get(drill) ?? { inAttempt: false, succeeded: false };
 
     if (triggered) {
@@ -83,9 +84,9 @@ function evaluateDrill(
 }
 
 // Checks if the entry is a trigger that was just pressed
-function isTriggered(trigger: Action, entry: HistoryEntry): boolean {
-    if (entry.frames != 1) return false;
-    return isSubset(trigger.buttons, entry.action.buttons);
+function isTriggered(trigger: Action, lastEntry: HistoryEntry, secondLastEntry: HistoryEntry): boolean {
+    if (lastEntry.frames != 1) return false;
+    return isSubset(trigger.buttons, lastEntry.action.buttons) && !isSubset(trigger.buttons, secondLastEntry.action.buttons);
 }
 
 function isSubset(sub: Set<number>, superSet: Set<number>): boolean {
