@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { View } from "../pages/types";
 import Dropdown from "./Dropdown";
+import PressDisplay from "./PressDisplay";
 
 interface DrillEditorProps {
     text: string;
@@ -77,32 +78,35 @@ export default function DrillEditor({
                         3. Go to Training and start practicing!
                     </div>
                 )}
-                <div className="fgc-file">
-                    <span className="fgc-file-label">FGC File:</span>
-                    <Dropdown
-                        value={currentFile ?? ""}
-                        options={fileNames}
-                        onChange={onSelectFile}
-                        className="file-selector"
-                    />
+                <div className="file-settings">
+                    <div className="fgc-file">
+                        <span className="fgc-file-label">FGC File:</span>
+                        <Dropdown
+                            value={currentFile ?? ""}
+                            options={fileNames}
+                            onChange={onSelectFile}
+                            className="file-selector"
+                        />
+                    </div>
+                    <div className="buttons">
+                        <button onClick={onApply}>Apply</button>
+                        <button onClick={onReset}>Reset</button>
+                        <button onClick={onDownload}>Download</button>
+                        <button onClick={() => fileInputRef.current?.click()}>Import</button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".fgc,.txt"
+                            hidden
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) onImport(file);
+                                e.target.value = "";
+                            }}
+                        />
+                    </div>
                 </div>
-                <div className="buttons">
-                    <button onClick={onApply}>Apply</button>
-                    <button onClick={onReset}>Reset</button>
-                    <button onClick={onDownload}>Download</button>
-                    <button onClick={() => fileInputRef.current?.click()}>Import</button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".fgc,.txt"
-                        hidden
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) onImport(file);
-                            e.target.value = "";
-                        }}
-                    />
-                </div>
+                <PressDisplay />
                 <div className="settings">
                     <div className="setting-row">
                         <span className="settings-label">Show Tutorial:</span>
