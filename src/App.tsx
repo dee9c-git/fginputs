@@ -5,7 +5,14 @@ import { useDrillTracker } from "./state/store";
 import TopBar from "./ui/TopBar";
 
 export default function App() {
-  const [view, setView] = useState<View>("config");
+  const [startView, setStartViewState] = useState<View>(
+    () => (localStorage.getItem("fginputs.startView") as View) || "config",
+  );
+  const [view, setView] = useState<View>(startView);
+  const setStartView = (v: View) => {
+    setStartViewState(v);
+    localStorage.setItem("fginputs.startView", v);
+  };
   const [selected, setSelected] = useState<string | null>(null);
 
   const {
@@ -61,6 +68,9 @@ export default function App() {
         error={parseError}
         fileNames={fileNames}
         currentFile={currentFile}
+        view={view}
+        startView={startView}
+        onStartViewChange={setStartView}
         onSelectFile={onSelectFile}
         onChange={onTextChange}
         onApply={onApply}
