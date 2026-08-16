@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { View } from "../pages/types";
+import Dropdown from "./Dropdown";
 
 interface DrillEditorProps {
     text: string;
@@ -76,17 +77,15 @@ export default function DrillEditor({
                         3. Go to Training and start practicing!
                     </div>
                 )}
-                <select
-                    className="file-selector"
-                    value={currentFile ?? ""}
-                    onChange={(e) => onSelectFile(e.target.value)}
-                >
-                    {fileNames.map((name) => (
-                        <option key={name} value={name}>
-                            {name}
-                        </option>
-                    ))}
-                </select>
+                <div className="fgc-file">
+                    <span className="fgc-file-label">FGC File:</span>
+                    <Dropdown
+                        value={currentFile ?? ""}
+                        options={fileNames}
+                        onChange={onSelectFile}
+                        className="file-selector"
+                    />
+                </div>
                 <div className="buttons">
                     <button onClick={onApply}>Apply</button>
                     <button onClick={onReset}>Reset</button>
@@ -105,58 +104,60 @@ export default function DrillEditor({
                     />
                 </div>
                 <div className="settings">
-                    <span className="settings-label">Show Tutorial:</span>
-                    <div className="radio-inputs settings-toggle">
-                        <label className="radio">
-                            <input
-                                type="radio"
-                                name="tutorial"
-                                checked={showTutorial}
-                                onChange={() => updateShowTutorial(true)}
-                            />
-                            <span className="radio-item">On</span>
-                        </label>
-                        <label className="radio">
-                            <input
-                                type="radio"
-                                name="tutorial"
-                                checked={!showTutorial}
-                                onChange={() => updateShowTutorial(false)}
-                            />
-                            <span className="radio-item">Off</span>
-                        </label>
+                    <div className="setting-row">
+                        <span className="settings-label">Show Tutorial:</span>
+                        <div className="radio-inputs settings-toggle">
+                            <label className="radio">
+                                <input
+                                    type="radio"
+                                    name="tutorial"
+                                    checked={showTutorial}
+                                    onChange={() => updateShowTutorial(true)}
+                                />
+                                <span className="radio-item">On</span>
+                            </label>
+                            <label className="radio">
+                                <input
+                                    type="radio"
+                                    name="tutorial"
+                                    checked={!showTutorial}
+                                    onChange={() => updateShowTutorial(false)}
+                                />
+                                <span className="radio-item">Off</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div className="settings">
-                    <span className="settings-label">Starting Location:</span>
-                    <div className="radio-inputs settings-toggle">
-                        <label className="radio">
-                            <input
-                                type="radio"
-                                name="start-view"
-                                checked={startView === "config"}
-                                onChange={() => onStartViewChange("config")}
-                            />
-                            <span className="radio-item">Config</span>
-                        </label>
-                        <label className="radio">
-                            <input
-                                type="radio"
-                                name="start-view"
-                                checked={startView === "training"}
-                                onChange={() => onStartViewChange("training")}
-                            />
-                            <span className="radio-item">Training</span>
-                        </label>
-                        <label className="radio">
-                            <input
-                                type="radio"
-                                name="start-view"
-                                checked={startView === "moves"}
-                                onChange={() => onStartViewChange("moves")}
-                            />
-                            <span className="radio-item">Move List</span>
-                        </label>
+                    <div className="setting-row">
+                        <span className="settings-label">Starting Location:</span>
+                        <div className="radio-inputs settings-toggle">
+                            <label className="radio">
+                                <input
+                                    type="radio"
+                                    name="start-view"
+                                    checked={startView === "config"}
+                                    onChange={() => onStartViewChange("config")}
+                                />
+                                <span className="radio-item">Config</span>
+                            </label>
+                            <label className="radio">
+                                <input
+                                    type="radio"
+                                    name="start-view"
+                                    checked={startView === "training"}
+                                    onChange={() => onStartViewChange("training")}
+                                />
+                                <span className="radio-item">Training</span>
+                            </label>
+                            <label className="radio">
+                                <input
+                                    type="radio"
+                                    name="start-view"
+                                    checked={startView === "moves"}
+                                    onChange={() => onStartViewChange("moves")}
+                                />
+                                <span className="radio-item">Move List</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
