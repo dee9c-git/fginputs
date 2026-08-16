@@ -716,11 +716,8 @@ body {
 }
 
 .fgc-file {
-    padding: 0px 20%;
-    font-size: 25px;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    justify-content: center;
     position: relative;
 }
 

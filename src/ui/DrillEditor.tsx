@@ -80,7 +80,6 @@ export default function DrillEditor({
                 )}
                 <div className="file-settings">
                     <div className="fgc-file">
-                        <span className="fgc-file-label">FGC File:</span>
                         <Dropdown
                             value={currentFile ?? ""}
                             options={fileNames}
