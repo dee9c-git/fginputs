@@ -46,26 +46,32 @@ export default function TrainingPage({
                     </div>
                 )}
             </div>
-            {trainingDrill && (
+            {drillViews.length > 0 ? (
+                trainingDrill && (
+                    <div className="drill-training">
+                        <Dropdown
+                            value={selected ?? ""}
+                            options={drillViews.map((d) => d.name)}
+                            onChange={onSelectedChange}
+                            className="drill-name"
+                        />
+                        <span
+                            className={`drill-combo${trainingDrill.missed || trainingDrill.combo === 0 ? " drill-combo-idle" : ""}`}
+                        >
+                            {(trainingDrill.missed || trainingDrill.combo === 0) ? "COMBO: --" : `COMBO: x${trainingDrill.combo}`}
+                        </span>
+                        <span className="drill-done">
+                            Success Rate:{" "}
+                            {trainingDrill.attempts === 0 ? "--/--" : `${trainingDrill.count}/${trainingDrill.attempts}`} (
+                            {trainingDrill.attempts > 0 ? Math.round((trainingDrill.count / trainingDrill.attempts) * 100) : 0}%) / Time:{" "}
+                            {trainingDrill.attempts === 0 ? "--" : trainingDrill.lastMissed ? "--" : `${trainingDrill.firstInputFrames}+${trainingDrill.allFrames - trainingDrill.firstInputFrames}f`}{" "}
+                            [Average: {trainingDrill.count > 0 ? `${Math.round(trainingDrill.totalFirstInputFrames / trainingDrill.count)}+${Math.round((trainingDrill.totalFrames - trainingDrill.totalFirstInputFrames) / trainingDrill.count)}f` : "--"}]
+                        </span>
+                    </div>
+                )
+            ) : (
                 <div className="drill-training">
-                    <Dropdown
-                        value={selected ?? ""}
-                        options={drillViews.map((d) => d.name)}
-                        onChange={onSelectedChange}
-                        className="drill-name"
-                    />
-                    <span
-                        className={`drill-combo${trainingDrill.missed || trainingDrill.combo === 0 ? " drill-combo-idle" : ""}`}
-                    >
-                        {(trainingDrill.missed || trainingDrill.combo === 0) ? "COMBO: --" : `COMBO: x${trainingDrill.combo}`}
-                    </span>
-                    <span className="drill-done">
-                        Success Rate:{" "}
-                        {trainingDrill.attempts === 0 ? "--/--" : `${trainingDrill.count}/${trainingDrill.attempts}`} (
-                        {trainingDrill.attempts > 0 ? Math.round((trainingDrill.count / trainingDrill.attempts) * 100) : 0}%) / Time:{" "}
-                        {trainingDrill.attempts === 0 ? "--" : trainingDrill.lastMissed ? "--" : `${trainingDrill.firstInputFrames}+${trainingDrill.allFrames - trainingDrill.firstInputFrames}f`}{" "}
-                        [Average: {trainingDrill.count > 0 ? `${Math.round(trainingDrill.totalFirstInputFrames / trainingDrill.count)}+${Math.round((trainingDrill.totalFrames - trainingDrill.totalFirstInputFrames) / trainingDrill.count)}f` : "--"}]
-                    </span>
+                    <div className="drill-name drill-name-disabled">No Moves</div>
                 </div>
             )}
         </div>

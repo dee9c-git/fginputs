@@ -72,6 +72,8 @@ export function useDrillTracker(
     useEffect(() => {
         if (drills && drills.length > 0) {
             setDrillViews(toDrillViews(drills));
+        } else {
+            setDrillViews([]);
         }
         stateRef.current.attempts.clear();
         resetLollipop();

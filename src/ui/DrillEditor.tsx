@@ -71,11 +71,13 @@ export default function DrillEditor({
                     <div className="tutorial">
                         Hello! You can remove the tutorial using the setting below.
                         <br />
-                        1. Change the text at the left side so your inputs match.
+                        1. Press a button you want to bind, and check which button is pressed.
                         <br />
-                        2. Click "Apply".
+                        2. Change the text at the left side to bind the button to the input.
                         <br />
-                        3. Go to Training and start practicing!
+                        3. Click "Apply".
+                        <br />
+                        4. Go to Training and start practicing!
                     </div>
                 )}
                 <div className="file-settings">
