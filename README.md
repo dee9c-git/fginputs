@@ -2,7 +2,7 @@
 
 # fginputs
 #### Motion inputs Trainer.
-<img alt="thumbnail" height="250" src="/readme-imgs/thumbnail.png" />
+<img alt="thumbnail" height="400" src="/readme-imgs/thumbnail.png" />
 </div>
 
 ## Check it out!
@@ -17,7 +17,9 @@ Check it out at [fginputs.dee9c.com](https://fginputs.dee9c.com)
 
 ## Features
 ### .fgc files
-<img alt=".fgc" height="250" src="/readme-imgs/fgc.png" />
+<div align="center">
+<img alt=".fgc" height="500" src="/readme-imgs/fgc.png" />
+</div>
 I made sort of a "programming language" for motion inputs, you can check out the tutorial.fgc file to understand how it works.
 We'll focus on the features here:
 
@@ -28,14 +30,18 @@ We'll focus on the features here:
 - Allow very precise inputs strings (e.g. a kara cancel is a 2 frame input, you can set it with \[\%1,\%2\])
 
 ### Radar
+<div align="center">
 <img alt="stick" height="250" src="/readme-imgs/stick.png" />
+</div>
 This was made for checking what you did wrong with the motion itself.
 
 - A red circle will be shown if your directional input reaches that edge
 - You can click on the 8 circles to toggle a white circle
 
 ### Lollipop
+<div align="center">
 <img alt="lollipop" height="250" src="/readme-imgs/lollipop.png" />
+</div>
 This was made to check the end of the motion input. <br />
 Usually the last input has to be done faster than the rest of the inputs, so the lollipop is here to check if you did it right.
 
@@ -43,7 +49,9 @@ Usually the last input has to be done faster than the rest of the inputs, so the
 - You can click on the boxes to toggle a white border
 
 ### Training Stats
-<img alt="stats" height="250" src="/readme-imgs/training-stats.png" />
+<div align="center">
+<img alt="stats" height="400" src="/readme-imgs/training-stats.png" />
+</div>
 
 - Success rate: How often is the motion input done correctly
 - Average frame count: The average frame count of all inputs
