@@ -8,6 +8,11 @@
 ## Check it out!
 Check it out at [fginputs.dee9c.com](https://fginputs.dee9c.com)
 
+## Motive
+It's hard for me to feel motivated training my inputs, so I wanted to make a site that makes it fun. <br />
+I wouldn't say the input display is bad in the games, but I felt like it could be better made so people can see what went wrong more easily. <br />
+So, I made many tools to help you debug your inputs, and other stats for you to check out or set goals for yourself.
+
 ## Tutorial
 (also in the website itself)
 1. Press a button you want to bind, and check which button is pressed.
