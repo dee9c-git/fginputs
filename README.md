@@ -1,7 +1,7 @@
 <div align="center">
 
 # fginputs
-#### Motion inputs Trainer.
+#### Train your motion inputs.
 <img alt="thumbnail" height="400" src="/readme-imgs/thumbnail.png" />
 </div>
 
